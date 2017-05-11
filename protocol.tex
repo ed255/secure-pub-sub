@@ -17,64 +17,92 @@ encryption. This ensures that
 
 \paragraph{Intuition.}
 
+\subsection{Basic Protocol}
 
-\noindent\textbf{Initialization.}
+\begin{figure}[h]
+	\caption{Basic Protocol}
+\label{fig:basicprotocol}
+\begin{mdframed}[style=myframe]
+
+%\begin{itemize}[leftmargin=*, itemsep=6pt]
+\textbf{Initialization.}
 \begin{itemize}[leftmargin=*]
  
-  \item Each new publisher sends to \broker a policy specifying allowed
-	computations on its data and generates a truly random seed $s_P$ and send
-	it to \garbler.
-  \item All publishers and subscribers establish an authenticated encrypted
-	channel with \broker and through \broker with \garbler.
+	\item Each new publisher sends \broker a policy specifying allowed
+		computations on its data and generates a truly random seed $s$ and send
+		it to \garbler.
+
+	\item All publishers and subscribers establish an authenticated encrypted
+		channel with \broker and through \broker with \garbler.
 
 \end{itemize}
 
-\noindent\textbf{Subscription.}
+\textbf{Subscription.}
 \begin{itemize}[leftmargin=*]
 
-	\item To subscribe computation $c$, subscriber sends a subscription request
-	  containing $c$ to \broker and requests an output masking seed from
-	  \garbler.  
-	\item \garbler sends a truly random seed $s'_c$ for computation $c$;
-	  generating a new seed if this is the first subscription for computation
-	  $c$. 
+	\item To subscribe computation $C$, subscriber sends a subscription request
+	  containing $C$ to \broker and requests an output masking seed from
+	  \garbler.
+
+	\item \garbler sends a truly random seed $s'$ for computation $C$; generating
+		a new seed if this is the first subscription for computation $C$.
+
 \end{itemize}
 
-\noindent\textbf{Publication.}
+\textbf{Publication.}
 \begin{itemize}[leftmargin=*]
 		
 	\item To publish $k$th value, publisher generates two pseudorandom wire
-	  labels, $w_0$ and $w_1$, using seed $s_i$, for each bit of the value.
-	  $w_0$ is $a$th and $w_1$ is $(a+1)$th numbers in pseudorandom sequence
-	  generated using seed $s_i$; $2kL \leq a < 2(k+1)L$, $L$ being the
-	  bit-length of a value.
+		labels, $w_0$ and $w_1$, using seed $s$, for each bit of the value.  $w_0$
+		is $i$th and $w_1$ is $(i+1)$th numbers in pseudorandom sequence generated
+		using seed $s$; $2kL \leq i < 2(k+1)L$, $L$ being the bit-length of a
+		value.
 
 \end{itemize}
 
-\noindent\textbf{Computation.}
+\textbf{Computation.}
 \begin{itemize}[leftmargin=*]
 
-  \item After \broker has wire labels for all publishers' inputs required for
-	computation $c$, it requests \garbler to garble circuit for $c$.  
+	\item Once \broker has wire labels for all publishers' inputs required for
+		computation $C$, it requests \garbler to garble a circuit for $C$.  
   
-  \item \garbler independently generates input wire labels using seed $s_P$
-	from each publisher contributing input and an output mask $m$ using seed
-	$s'_c$ for each bit of output.
+	\item \garbler independently generates input wire labels using seed $s$ from
+		each publisher contributing input and an output mask $m$ using seed $s'$
+		for each output bit.
 
-  \item \garbler generates garbled circuit for $M \circ C(.)$, composition of
-	masking function $M$ (XOR) and computation $C$, and sends it to \broker.
+	\item \garbler generates garbled circuit for $M \circ C(\cdot)$, composition
+		of masking function $M:XOR$ and computation $C$, and sends it to \broker.
 
-  \item \broker evaluates the garbled circuit using wire labels sent by
-	publishers, obtains masked output $o \xor m$, and send $o \xor m$ to all
-	subscribers of computation $c$.
+	\item \broker evaluates the garbled circuit using wire labels sent by
+		publishers, obtains masked output $o \xor m$, and send $o \xor m$ to all
+		subscribers of computation $C$.
   
-  \item Subscribers generate the mask $m$ using the seed $s'_c$ and unmask the
-	output $o$.
+	\item Subscribers generate the mask $m$ using the seed $s'$ and unmask the
+		output $o$.
 
 \end{itemize}
 
+\end{mdframed}
+\end{figure}
 
 \paragraph{Forward Security.}
+\unsure{Do we have to generate seed and ratchet key? Can't we use the seed as a
+ratchet key?}
+
+
+\begin{itemize}[leftmargin=*]
+
+		\item Generate a truly random key $K_0$.
+
+		\item Generate, using KDF with key $K_0$, a pseudorandom seed $s_0$ and a
+			pseudorandom key for the ratchet round $1$. Seed $s_0$ is used to
+			generate pseudorandom strings during ratchet round $0$.
+
+		\item At round $r$, using KDF with key $K_r$, generate a pseudorandom seed
+			$s_r$ and key for ratchet round $r+1$. Seed $s_r$ is used to generate
+			pseudorandom strings during ratchet round $r$.
+
+\end{itemize}
 
 \paragraph{Garbled Circuit XOR Compatibility.}
 
