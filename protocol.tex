@@ -1,0 +1,82 @@
+\section{Protocol}
+\label{sec:protocol}
+
+* We minimize the communication with \garbler, using clever tricks, e.g.,
+we don't need to send labels to \garbler for circuit garbling instead they
+generate it independently using shared seed.
+
+* publishers and subscribers only talk to the broker. The communication
+between publishers and subscriber is done through \broker using end-to-end
+encryption. This ensures that 
+
+* Does the subscriber seed needs to be computation specific?
+
+* We use ratcheting for forward security if seed is compromised.
+
+* We assume PKI.
+
+\paragraph{Intuition.}
+
+
+\noindent\textbf{Initialization.}
+\begin{itemize}[leftmargin=*]
+ 
+  \item Each new publisher sends to \broker a policy specifying allowed
+	computations on its data and generates a truly random seed $s_P$ and send
+	it to \garbler.
+  \item All publishers and subscribers establish an authenticated encrypted
+	channel with \broker and through \broker with \garbler.
+
+\end{itemize}
+
+\noindent\textbf{Subscription.}
+\begin{itemize}[leftmargin=*]
+
+	\item To subscribe computation $c$, subscriber sends a subscription request
+	  containing $c$ to \broker and requests an output masking seed from
+	  \garbler.  
+	\item \garbler sends a truly random seed $s'_c$ for computation $c$;
+	  generating a new seed if this is the first subscription for computation
+	  $c$. 
+\end{itemize}
+
+\noindent\textbf{Publication.}
+\begin{itemize}[leftmargin=*]
+		
+	\item To publish $k$th value, publisher generates two pseudorandom wire
+	  labels, $w_0$ and $w_1$, using seed $s_i$, for each bit of the value.
+	  $w_0$ is $a$th and $w_1$ is $(a+1)$th numbers in pseudorandom sequence
+	  generated using seed $s_i$; $2kL \leq a < 2(k+1)L$, $L$ being the
+	  bit-length of a value.
+
+\end{itemize}
+
+\noindent\textbf{Computation.}
+\begin{itemize}[leftmargin=*]
+
+  \item After \broker has wire labels for all publishers' inputs required for
+	computation $c$, it requests \garbler to garble circuit for $c$.  
+  
+  \item \garbler independently generates input wire labels using seed $s_P$
+	from each publisher contributing input and an output mask $m$ using seed
+	$s'_c$ for each bit of output.
+
+  \item \garbler generates garbled circuit for $M \circ C(.)$, composition of
+	masking function $M$ (XOR) and computation $C$, and sends it to \broker.
+
+  \item \broker evaluates the garbled circuit using wire labels sent by
+	publishers, obtains masked output $o \xor m$, and send $o \xor m$ to all
+	subscribers of computation $c$.
+  
+  \item Subscribers generate the mask $m$ using the seed $s'_c$ and unmask the
+	output $o$.
+
+\end{itemize}
+
+
+\paragraph{Forward Security.}
+
+\paragraph{Garbled Circuit XOR Compatibility.}
+
+
+* What if one publisher doesn't send wire labels. After timeout the broker can inform the \garbler and it will use zero for such values in the circuit.
