@@ -1,6 +1,135 @@
 \section{System}
 \label{sec:system}
 
-\paragraph{Extending libgarble.}
+\paragraph{Extending \libgarble.}
+
+% TODO: \libgarble is an unfinished library and so needed tome touches:
+%- Implement OR and NOT gates for `GARBLE_TYPE_STANDARD`.
+% NOT(a) = XOR(a, 1)
+
+% TODO: To build circuits out of general arithmetic operations, we added the following circuit building blocks:
+%    - Add `circuit_mul_fxp()`: Multiply 2 N-bit fixed point numbers, output 2N bits
+%    - Add `circuit_sign_ext()`: Copy input to output with sign extension
+%    - Add `circuit_neg`: Negate an N-bit signed number
+%    - Add `circuit_div_fxp()`: Divide 2 N-bit fixed point numbers, output N bits
+% Not optimized
+%    - `circuit_min()`: Handle signed integers
+
+% TODO: Two's complement for signed arithmetic
+
+% TODO: Fixed point arithmetic.
+
+\paragraph{High level language to build circuits.}
+
+While \libgarble exposes the functions needed to build circuits corresponding to
+the functions we are interested in, the process becomes cumbersome and error
+prone.  To facilitate building circuits from functions we have implemented an
+interpreter for a functional programming language inspired in Scheme, a dialect
+of Lisp.  This choice was motivated both by the simplicity of parsing a
+Lips-like language as well as the similarity between the descriptive nature of
+functional languages with combinational circuits.  Moreover, the availability
+of high-order functions in the language (functions that take functins as
+arguments and/or return functions as a result) allows us to express circuits
+that combine building blocks very concisely.
+
+The interpreter is written in golang in just 470 lines of code.
+
+\begin{lstlisting}
+(begin
+  (define fold
+    (lambda (f l)
+      (if (equal? (cdr l) ())
+        (car l)
+        (f (car l) (fold f (cdr l))))))
+
+  (define min
+    (lambda (l)
+      (fold min2 l)))
+)
+\end{lstlisting}
+
+Where the only \libgarble building block is \texttt{min2}, which takes two
+signed integers and returns the smaller one.
+
+\texttt{fold} is a high order function that recursively traverses a list
+\texttt{l} combining its elements with a function \texttt{f} to build up a
+return value.
+
+\begin{lstlisting}
+(begin
+  (define t1 (val "Campus/CS/112/temp"))
+  (define t2 (val "Campus/CS/114/temp"))
+  (define t3 (val "Campus/CS/115/temp"))
+  (define t4 (val "Campus/CS/221/temp"))
+  (define t5 (val "Campus/CS/223/temp"))
+
+  (define temps (list t1 t2 t3 t4 t5))
+
+  (start-building)
+  (min temps)
+)
+\end{lstlisting}
+
+From this function definition the interpreter is capable of constructing the circuit that evaluates the function as well as storing the list of publisher values required to evaluate it.
+
+% TODO: Real number encoding: Two's complement fixed point 32 bit numbers, with 8 bits for decimals and 26 bits for the integer part.
+
+\paragraph{Broker and Third Party.}
+
+% TODO: Written in golang.
+% TODO: Choice of go: provides built-in concurrency facilities such as
+% \emph{goroutines} (light-weight threads) and \emph{channels} (a primitive to
+% send messages between \emph{goroutines}).   It offers the good performance of
+% a compiled language with the benefits of memory safety.
+% TODO: Add golang reference?
+% TODO: Broker and Third Party communicate over RPC synchronously.
+% TODO: Broker takes a regular \MQTT Broker {reference:
+% https://github.com/jeffallen/mqtt} and adds a callback to the \MQTT message
+% receiver function that handles the message when its topic prefix matches a
+% string corresponding to our protocol namespace.
+
+% TODO: The Broker and Third Party maintain replicated data structures to store
+% information of every Publisher, Subscriber and function.
+
+% The Third Party is in charge of maintaining Publishers ratchet keys in sync
+% with Publishers, and Function ratchet keys in sync with Subscribers
+% interested in that function.  The Third Party also garbles circuits on demand
+% for the Broker.
+
+% The Broker is in charge of storing Publishers encrypted values with their
+% corresponding publisher ratchet key round, and requesting garbling of
+% circuits to the Third Party (for those particular Publishers values rounds)
+% to evaluate the garbled circuit and send the result to the subscribed
+% Subscribers.
+
+\paragraph{Publisher and Subscriber.}
+
+% TODO: Publisher written in C to minimize its memory footprint, thinking about IoT.
+% TODO: Subscriber written in golang.
+% TODO: Subscriber \MQTT client library {reference: https://github.com/jeffallen/mqtt}
+
+Publishers and Subscribers follow a state machine to initialize themselves
+(i.e. for Publishers to obtain a Publisher ratchet key, for Subscribers to
+obtain the Function ratchet key of all desired functions).  The initialization
+to establish the ratchet keys happens through a message exchange with the
+Broker and Third Party via \MQTT messages published and received at a unique
+per-device specific topic.  The device specific topic is formed using the
+Client's (Subscriber or Publisher) public key.
 
 \paragraph{Identity Gates for FreeXOR Compatibility.}
+
+% TODO: Explain:
+% The free XOR optimization in garbled circuits require that for every
+% wire, the XOR of the label for bit 0 and bit 1 be a unique secret
+% constant 'delta' value.  Since input values are generated by
+% independent publishers using their own seed, it's not easy to achieve
+% this pattern without adding complexity to the system.  For this reason,
+% the garbler will generate one 'identity' gate per input wire that will
+% allow transforming the inputs sent by publishers to garbled circuit
+% inputs that follow the 'delta' pattern.
+
+% TODO: Crypto library used is libsodium {reference: https://download.libsodium.org/doc/} which is a fork of NaCl {reference: http://nacl.cr.yp.to/}
+
+% TODO: Eclipse Paho MQTT client library used in the Publisher {reference: https://www.eclipse.org/paho/clients/c/}
+
+% TODO: Explain what is optimized and what is not.
