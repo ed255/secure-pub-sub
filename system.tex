@@ -1,135 +1,236 @@
 \section{System}
 \label{sec:system}
 
+Our protocol implementation works on top of the IoT \MQTT{} protocol, which
+allows exchanging messages in a publisher-subscriber model arbitrated by a
+broker.  In order to set up the ratchet keys, both Subscribers and Publishers
+need a private communication channel with the Third Party.  In order to embed
+this communication into the MQTT protocol each client (either Publisher or
+Subscriber) will have a device-specific topic that will allow two-way
+authenticated communication between each client and the Broker.  The Broker
+will forward the messages from this channel to the Third Party so that clients
+can establish a ratchet key with the Third Party.  This design choice helps us
+maintain the \MQTT{} semantics on the clients, since they only exchange
+messages with a single Broker at the \MQTT{} level.
+
+Although \MQTT{} can be used on top of TLS to provide secrecy, authenticity and
+forward-secrecy; when clients obtain the ratchet keys from the Third Party
+the communication is forwarded by the Broker at the application layer, so we
+need to protect it to maintain secrecy, authenticity and forward-secrecy
+against the Broker.  For this reason we choose to add authentication in the
+\MQTT{} messages by means of public key signature and we use a key exchange
+protocol to share secrets between Clients and the Third Party.  In the case of
+Publishers, this authenticated key exchange is used to derive the Publisher'
+ratchet key.  In the case of Subscribers, for every function subscription, a
+key exchange is performed to derive a key to encrypt the function ratchet key
+sent from the Third Party to the Subscriber.
+
+This design achieves the desired cryptographic properties of TLS for selected
+parts of the messages underlying the \MQTT{} communication, allowing the Broker
+to be aware of the operation without being able to reveal or tamper any ratchet
+key.
+
+During the Publisher setup phase, not only its ratchet key will be established
+but also the Broker will register a special publishing topic that the Publisher
+will use to submit its encrypted values.  Every time the Broker evaluates a
+garbled circuit using Publishers encrypted values as inputs, it will publish
+the masked result to the relevant function topic so that the interested
+Subscribers can receive it after having subscribed to that function topic.
+
+The \MQTT{} messages for our protocol are encoded in JSON, with all the binary
+data encoded in base64.  A possible improvement in performance and bandwidth
+usage would consist on replacing this encoding for a binary one such as
+Protocol Buffers.
+
+% TODO: Add reference to Protocol Buffers.  Add reference to JSON?
+
 \paragraph{Extending \libgarble.}
 
-% TODO: \libgarble is an unfinished library and so needed tome touches:
-%- Implement OR and NOT gates for `GARBLE_TYPE_STANDARD`.
-% NOT(a) = XOR(a, 1)
+\libgarble{} is a garbling library written in C based on \emph{JustGarble} that
+is in current development.  It extends \emph{JustGarble} by adding two
+different size optimizations in the garbled circuit: Half-gates (which combines
+the free-XOR optimization with AND gates that only require two ciphertexts) and
+Privacy-free garbling (which achieves the free-XOR optimization with AND gates
+that only require one ciphertext at the cost of losing privacy and only
+guaranteeing authenticity).  Apart from restructuring the code to make it more
+concise, it also offers a better API than \emph{JustGarble} to build circuits.
 
-% TODO: To build circuits out of general arithmetic operations, we added the following circuit building blocks:
-%    - Add `circuit_mul_fxp()`: Multiply 2 N-bit fixed point numbers, output 2N bits
-%    - Add `circuit_sign_ext()`: Copy input to output with sign extension
-%    - Add `circuit_neg`: Negate an N-bit signed number
-%    - Add `circuit_div_fxp()`: Divide 2 N-bit fixed point numbers, output N bits
-% Not optimized
-%    - `circuit_min()`: Handle signed integers
+Nevertheless, \libgarble{} being in current development lacks some
+functionality which we had to add in order to build circuits and garble them
+according to our needs.  On the garbling side, we implemented the NOT gate
+(expressed as the XOR of the input with 1 to take advantage of the free-XOR
+optimization) and the OR gate.  Our implementation doesn't use the half-gates
+optimization due to the fact for this mode of operation, \libgarble{} in its
+current design only reserves two ciphertext per gate, not allowing the
+implementation of OR gates in a straight-forward manner.
 
-% TODO: Two's complement for signed arithmetic
+We added some arithmetic blocks to be used when building circuits in order to
+allow a wide variety of functions to be described: \textbf{Signed fixed point
+multiplication}, \textbf{Signed fixed point division} and \textbf{Signed
+min/max}.
 
-% TODO: Fixed point arithmetic.
+The motivation to operate with fixed point numbers was to be able apply
+arbitrary functions based on arithmetic operations without the constraint of
+having just integer values.  Even though it would be easy to scale input values
+to be integers maintaining the desired precision, it's common in several
+algorithms used in our applications to have intermediate values with decimals
+that are significant.
+
+A similar reasoning goes for supporting signed numbers.  We use the common
+two's complement to represent such numbers, which work straightforward for
+addition and integer multiplication but require special changes for fixed point
+multiplication, division and min/max.
 
 \paragraph{High level language to build circuits.}
 
-While \libgarble exposes the functions needed to build circuits corresponding to
-the functions we are interested in, the process becomes cumbersome and error
+While \libgarble{} exposes the functions needed to build circuits corresponding
+to the functions we are interested in, the process becomes cumbersome and error
 prone.  To facilitate building circuits from functions we have implemented an
 interpreter for a functional programming language inspired in Scheme, a dialect
 of Lisp.  This choice was motivated both by the simplicity of parsing a
-Lips-like language as well as the similarity between the descriptive nature of
-functional languages with combinational circuits.  Moreover, the availability
-of high-order functions in the language (functions that take functins as
-arguments and/or return functions as a result) allows us to express circuits
-that combine building blocks very concisely.
+Lisp-like language as well as the similarity between the descriptive nature of
+functional languages with combinational circuits, which helps reasoning about
+how the circuit is built.  Moreover, the availability of high-order functions
+in the language (functions that take functions as arguments and/or return
+functions as a result) allows us to express circuits that combine building
+blocks very concisely.
 
 The interpreter is written in golang in just 470 lines of code.
 
-\begin{lstlisting}
-(begin
-  (define fold
-    (lambda (f l)
-      (if (equal? (cdr l) ())
-        (car l)
-        (f (car l) (fold f (cdr l))))))
+Other solutions to express garbled circuits in higher level languages than the
+underlying gates themselves have been proposed: namely \OblivC{}.  \OblivC{}
+allows the developer to embed the secure computation part of a protocol in C
+code with a GCC wrapper that takes care of the compilation, the circuit
+building and the integration in a distributed program.  We don't require this
+embedding in our protocol because the secure function is directly described
+independently.
 
-  (define min
-    (lambda (l)
-      (fold min2 l)))
-)
-\end{lstlisting}
+% TODO: Add Obliv-C reference
 
-Where the only \libgarble building block is \texttt{min2}, which takes two
+\lstinputlisting[style=Scheme, frame=single,
+caption={Definition of the \emph{fold} high order function with an example of
+its usage with \emph{min2} to define a new function.}]
+{listings/prelude.lsp}
+
+Where the only \libgarble{} building block is \texttt{min2}, which takes two
 signed integers and returns the smaller one.
 
 \texttt{fold} is a high order function that recursively traverses a list
 \texttt{l} combining its elements with a function \texttt{f} to build up a
 return value.
 
-\begin{lstlisting}
-(begin
-  (define t1 (val "Campus/CS/112/temp"))
-  (define t2 (val "Campus/CS/114/temp"))
-  (define t3 (val "Campus/CS/115/temp"))
-  (define t4 (val "Campus/CS/221/temp"))
-  (define t5 (val "Campus/CS/223/temp"))
+\lstinputlisting[style=Scheme, frame=single,
+caption={Example of a function over Publishers' values.}]
+{listings/min-example.lsp}
 
-  (define temps (list t1 t2 t3 t4 t5))
+From this function definition the interpreter is capable of constructing the
+circuit that evaluates the function as well as storing the list of publisher
+values required to evaluate it.
 
-  (start-building)
-  (min temps)
-)
-\end{lstlisting}
-
-From this function definition the interpreter is capable of constructing the circuit that evaluates the function as well as storing the list of publisher values required to evaluate it.
-
-% TODO: Real number encoding: Two's complement fixed point 32 bit numbers, with 8 bits for decimals and 26 bits for the integer part.
+Four our implementation we decided to use the same representation for all
+numerical values: two's complement fixed point 32 bit numbers, with 26 bits for
+the integer part and 8 bits for the decimal part.
 
 \paragraph{Broker and Third Party.}
 
-% TODO: Written in golang.
-% TODO: Choice of go: provides built-in concurrency facilities such as
-% \emph{goroutines} (light-weight threads) and \emph{channels} (a primitive to
-% send messages between \emph{goroutines}).   It offers the good performance of
-% a compiled language with the benefits of memory safety.
+The Broker and the Third Party have been written in the Go programming
+language.  The choice of go was motivated on one hand due to the provided
+built-in concurrency facilities such as \emph{goroutines} (light-weight
+threads) and \emph{channels} (a primitive to send messages between
+\emph{goroutines}), which are very appropriate for the networking server nature
+of both entities.  On the other hand, this language offers the good performance
+of a compiled language with the benefits of memory safety (which is very
+welcomed when dealing with dynamic data structures).
+
 % TODO: Add golang reference?
-% TODO: Broker and Third Party communicate over RPC synchronously.
-% TODO: Broker takes a regular \MQTT Broker {reference:
-% https://github.com/jeffallen/mqtt} and adds a callback to the \MQTT message
-% receiver function that handles the message when its topic prefix matches a
-% string corresponding to our protocol namespace.
 
-% TODO: The Broker and Third Party maintain replicated data structures to store
-% information of every Publisher, Subscriber and function.
+The communication between the Broker and Third Party (to request the garbling
+of a circuit for Publishers inputs at some particular rounds) happens over RPC
+synchronously.
 
-% The Third Party is in charge of maintaining Publishers ratchet keys in sync
-% with Publishers, and Function ratchet keys in sync with Subscribers
-% interested in that function.  The Third Party also garbles circuits on demand
-% for the Broker.
+Implementation wise, the Broker requires a regular \MQTT{} Broker server
+{reference: https://github.com/jeffallen/mqtt} with the minor modification that
+any received message whose topic starts with a name space reserved for our
+protocol, will be handled according to the protocol description instead of being forwarded to the subscribers of that topic.
 
-% The Broker is in charge of storing Publishers encrypted values with their
-% corresponding publisher ratchet key round, and requesting garbling of
-% circuits to the Third Party (for those particular Publishers values rounds)
-% to evaluate the garbled circuit and send the result to the subscribed
-% Subscribers.
+The Broker and Third Party are required to maintain replicated data structures
+to store information of every Publisher, Subscriber and function.  Our design
+makes this requirement easy because all setup messages between clients and
+Third Party are forwarded by the Broker, allowing the later one to register the
+non-secret details of the setup.
+
+The Third Party is in charge of maintaining Publishers ratchet keys in sync
+with Publishers, and Function ratchet keys in sync with Subscribers interested
+in that function.  The Third Party also garbles circuits on demand for the
+Broker.
+
+The Broker is in charge of storing Publishers encrypted values with their
+corresponding publisher ratchet key round, and of requesting the garbling of
+circuits to the Third Party (for those particular Publishers values rounds) to
+evaluate the garbled circuit and send the result to the subscribed Subscribers.
 
 \paragraph{Publisher and Subscriber.}
 
-% TODO: Publisher written in C to minimize its memory footprint, thinking about IoT.
-% TODO: Subscriber written in golang.
-% TODO: Subscriber \MQTT client library {reference: https://github.com/jeffallen/mqtt}
+The Publisher has been written in C in order to minimize its memory footprint
+as well as its resource consumption, considering that the code may be running
+in a resource-constraint IoT device.  For the \MQTT{} part of the Publisher we
+have used the Eclipse Paho client library {reference:
+https://www.eclipse.org/paho/clients/c/}.
+
+
+On the other hand, the Subscriber has been written in golang, assuming that it
+will be running on a more powerful device.  The \MQTT{} library used by the
+Subscriber is the same we used in the Broker, which also provides client
+functionality {reference: https://github.com/jeffallen/mqtt}.
 
 Publishers and Subscribers follow a state machine to initialize themselves
-(i.e. for Publishers to obtain a Publisher ratchet key, for Subscribers to
+(i.e.\ for Publishers to obtain a Publisher ratchet key, for Subscribers to
 obtain the Function ratchet key of all desired functions).  The initialization
 to establish the ratchet keys happens through a message exchange with the
-Broker and Third Party via \MQTT messages published and received at a unique
+Broker and Third Party via \MQTT{} messages published and received at a unique
 per-device specific topic.  The device specific topic is formed using the
 Client's (Subscriber or Publisher) public key.
 
 \paragraph{Identity Gates for FreeXOR Compatibility.}
 
-% TODO: Explain:
-% The free XOR optimization in garbled circuits require that for every
-% wire, the XOR of the label for bit 0 and bit 1 be a unique secret
-% constant 'delta' value.  Since input values are generated by
-% independent publishers using their own seed, it's not easy to achieve
-% this pattern without adding complexity to the system.  For this reason,
-% the garbler will generate one 'identity' gate per input wire that will
-% allow transforming the inputs sent by publishers to garbled circuit
-% inputs that follow the 'delta' pattern.
+The free XOR optimization in garbled circuits require that for every wire, the
+XOR of the label for bit 0 and bit 1 be a unique secret constant \emph{delta}
+value.  Since input values are generated by independent Publishers using their
+own seed, it's not easy to achieve this pattern without adding complexity to
+the system.  For this reason, the Third Party will generate one \emph{identity}
+gate per input wire that will allow transforming the inputs sent by Publishers
+to garbled circuit inputs that follow the \emph{delta} pattern.
 
-% TODO: Crypto library used is libsodium {reference: https://download.libsodium.org/doc/} which is a fork of NaCl {reference: http://nacl.cr.yp.to/}
+The implementation of these identity gates has been written in Go and is
+integrated in the Broker and Third Party.  Because it's not written in C, like
+the rest of the circuit garbling and garbled circuit evaluation, we consider
+this step not to be optimized for speed.  Nevertheless, its computation
+overhead should be small and linear in the number of the circuit function
+inputs.
 
-% TODO: Eclipse Paho MQTT client library used in the Publisher {reference: https://www.eclipse.org/paho/clients/c/}
+% OTHER STUFF
 
-% TODO: Explain what is optimized and what is not.
+\paragraph{Cryptography choices}
+
+For all the cryptographic operations we have used the \emph{libsodium} C
+library {reference: https://download.libsodium.org/doc/} which is a fork of
+NaCl {reference: http://nacl.cr.yp.to/}.  A particular feature of this library
+is that it offers basic cryptographic primitives with secure design choices
+for the underlying construction, algorithms and parameters.  This provides a
+high level of usability and removes the possibility of some error-prone
+choices.
+
+In particular, the library makes the following choices for the primitives we use.
+
+\begin{itemize}
+  \item \textbf{Key Derivation Function}: \emph{BLAKE2B} is used for the
+    underlying hash function.
+  \item \textbf{Public key signatures}: \emph{Ed25519} elliptic curves are used.
+  \item \textbf{Key Exchange}: Elliptic curve Diffie-Hellman with the
+    \emph{Curve25519} curve (that is, \emph{X25519}) is used to obtain a shared
+    secret, from which cryptographically secure keys are derived by applying
+    the \emph{BLAKE2B-512} hash function.
+  \item \textbf{Encryption}: The \emph{XSalsa20} stream cipher is used for
+    encryption with \emph{Poly1305} MAC to provide authenticity.
+  \item \textbf{CPRNG}: Uses the \emph{ChaCha20} stream cipher.
+\end{itemize}
