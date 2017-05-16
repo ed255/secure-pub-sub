@@ -3,6 +3,9 @@ acmart.pdf
 acmguide.pdf
 sample-*.pdf
 
+#vim
+*.vimrc
+
 ## Core latex/pdflatex auxiliary files:
 *.aux
 *.lof
