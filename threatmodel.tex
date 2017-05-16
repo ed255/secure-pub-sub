@@ -1,2 +1,10 @@
 \section{Threat Model}
 \label{sec:threatmodel}
+
+We assume that the adversary can \emph{maliciously} compromise all-but-one
+subscribers and all-but-one publishers. The adversary can also \emph{passively}
+compromise either \broker or \garbler but not both. We also consider the case
+where adversary can \emph{maliciously} compromise either \broker or \garbler but
+not both. The adversary cannot learn anything about uncompromised parties
+except what can be learned from the compromised parties data. \improvement{In
+some cases this could leak significant information. How can this be avoided?} 
