@@ -1,6 +1,9 @@
 \section{Protocol}
 \label{sec:protocol}
 
+Here we describe our protocol simply; our system section explain the complete
+implementation in detail.
+
 * We minimize the communication with \garbler, using clever tricks, e.g.,
 we don't need to send labels to \garbler for circuit garbling instead they
 generate it independently using shared seed.
@@ -17,6 +20,71 @@ encryption. This ensures that
 
 \paragraph{Intuition.}
 
+\begin{figure}[h]
+	\caption{Basic Protocol}
+\label{fig:basicprotocol}
+\begin{mdframed}[style=myframe]
+
+%\begin{itemize}[leftmargin=*, itemsep=6pt]
+
+\initialize
+\begin{itemize}[leftmargin=*]
+ 
+	\item Each new publisher sends \broker a policy specifying allowed
+		computations on its data.
+%		and generates a truly random seed $s$ and send
+%		it to \garbler.
+
+%	\item All publishers and subscribers establish an authenticated encrypted
+%		channel with \broker and through \broker with \garbler.
+
+\end{itemize}
+
+\subscribe
+\begin{itemize}[leftmargin=*]
+
+	\item To subscribe computation $C$, subscriber sends a subscription request
+		containing $C$ to \broker and requests an output mask $r$ for computation
+		$C$ from \garbler.
+
+	\item \garbler sends subscriber a pseudorandom mask $r$ for computation $C$;
+		generating a new mask if this is the first subscription for computation
+		$C$.
+
+\end{itemize}
+
+\publish
+\begin{itemize}[leftmargin=*]
+		
+	\item To publish $k$th value, publisher generates two pseudorandom wire
+		labels, $w_0$ and $w_1$, for each bit of the value. 
+		
+	\item For each input bit $b$, publisher sends only $w_b$ to \broker and sends
+		both $w_0$ and $w_1$ to \garbler.
+
+\end{itemize}
+
+\compute
+\begin{itemize}[leftmargin=*]
+
+	\item Once \broker has wire labels for all publishers' inputs required for
+		computation $C$, it requests \garbler to garble a circuit for $C$.  
+  
+	\item \garbler generates garbled circuit for $M \circ C$, composition of
+		masking function $M:XOR$ and computation $C$ with a hardwired pseudorandom
+		mask $r$ and sends garbled circuit to \broker.
+
+	\item \broker evaluates the garbled circuit using wire labels sent by
+		publishers, obtains masked output $o \xor r$, and sends $o \xor r$ to all
+		subscribers of computation $C$.
+  
+	\item Subscribers use mask $r$ to unmask the output $o$.
+
+\end{itemize}
+
+\end{mdframed}
+\end{figure}
+
 \subsection{Basic Protocol}
 
 \begin{figure}[h]
@@ -25,7 +93,8 @@ encryption. This ensures that
 \begin{mdframed}[style=myframe]
 
 %\begin{itemize}[leftmargin=*, itemsep=6pt]
-\textbf{Initialization.}
+
+\initialize
 \begin{itemize}[leftmargin=*]
  
 	\item Each new publisher sends \broker a policy specifying allowed
@@ -37,19 +106,20 @@ encryption. This ensures that
 
 \end{itemize}
 
-\textbf{Subscription.}
+\subscribe
 \begin{itemize}[leftmargin=*]
 
 	\item To subscribe computation $C$, subscriber sends a subscription request
 	  containing $C$ to \broker and requests an output masking seed from
 	  \garbler.
 
-	\item \garbler sends a truly random seed $s'$ for computation $C$; generating
-		a new seed if this is the first subscription for computation $C$.
+	\item \garbler sends a truly random seed $s'$ to the subscriber for
+		computation $C$; generating a new seed if this is the first subscription
+		for computation $C$.
 
 \end{itemize}
 
-\textbf{Publication.}
+\publish
 \begin{itemize}[leftmargin=*]
 		
 	\item To publish $k$th value, publisher generates two pseudorandom wire
@@ -58,9 +128,12 @@ encryption. This ensures that
 		using seed $s$; $2kL \leq i < 2(k+1)L$, $L$ being the bit-length of a
 		value.
 
+	\item For each input bit $b$, publisher sends only wire label $w_b$ to
+		\broker.
+
 \end{itemize}
 
-\textbf{Computation.}
+\compute
 \begin{itemize}[leftmargin=*]
 
 	\item Once \broker has wire labels for all publishers' inputs required for
@@ -107,4 +180,62 @@ ratchet key?}
 \paragraph{Garbled Circuit XOR Compatibility.}
 
 
-* What if one publisher doesn't send wire labels. After timeout the broker can inform the \garbler and it will use zero for such values in the circuit.
+* What if one publisher doesn't send wire labels. After timeout the broker can
+inform the \garbler and it will use zero for such values in the circuit.
+
+\subsection{Security Definition}
+
+\paragraph{Ideal World.}
+Our ideal functionality \F interacts with publishers, subscribers, \broker, and
+\garbler as follows:
+
+\begin{itemize}[leftmargin=*]
+		\item Each publisher sends a \policy to \F and each subscriber sends a
+			subscription message to \F containing subscribed computation $C$.
+		
+		\item All publishers whose data is required for $C$ upload data to \F. Let
+			$\vec{x}$ be the vector containing all this data.
+
+		\item \F sends $C$, \policy, and list of subscribers for $C$ to \broker.
+
+		\item \F sends $C$ to \garbler.
+
+		\item \garbler uploads to \F a pseudorandom mask $r$ for $C$.
+
+		\item For each subscriber $S$ subscribed to computation $C$, \F awaits for
+			\broker command allowing or denying $C(\vec{x})$; if \broker allows, \F
+			sends $C(\vec{x}) \xor r$ and $r$ to $S$ and if \broker denies, \F sends
+			empty message $\bot$.
+
+\end{itemize}
+
+\paragraph{Real World.} In real world, \F is replaced by our protocol~\ref{}.
+
+\paragraph{Simulator.}
+%In the real world, each publisher sends a \policy to
+%\broker and each subscriber sends a subscription message containing computation
+%$C$. For each input bit $b$, a publisher generates two wire labels, $w_0$ and
+%$w_1$, sends $w_b$ to \broker, and sends both $w_0$ and $w_1$ to \garbler.
+%
+%Once \broker has input wire labels from all publishers whose input is required
+%to compute $C$, it requests \garbler to garble a circuit for $M \circ C$, where
+%$M$ is an XOR masking function. \garbler garbled circuit for $C(\cdot) \xor r$,
+%with a pseudorandom mask $r$ hard wired in the circuit.
+%
+
+\improvement{We can hide $C$ using universal circuits.}
+\unsure{Who forms the topics? Publishers, clients, or broker?}
+
+
+\improvement{Using cut and choose for malicious security}
+
+\unsure{What is our current model? Are publishers, subscribers malicious?}
+
+\improvement{A publisher can always input wrong data, but there is nothing that
+can be done for this? May be it could be detected if it is creating a real
+problem.}
+
+\improvement{A subscribing entity can setup it's own \garbler. First we explain
+with \garbler as a separate tntity and then later explain how it can be
+eliminated by transfering it's functionality to subscribers. Similary, we can
+transfer some functionality to publishers. Which one of them is better?}
