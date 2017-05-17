@@ -42,9 +42,7 @@ data encoded in base64.  A possible improvement in performance and bandwidth
 usage would consist on replacing this encoding for a binary one such as
 Protocol Buffers.
 
-% TODO: Add reference to Protocol Buffers.  Add reference to JSON?
-
-\paragraph{Extending \libgarble.}
+\subsection{Extending \libgarble.}
 
 \libgarble{} is a garbling library written in C based on \emph{JustGarble} that
 is in current development.  It extends \emph{JustGarble} by adding two
@@ -81,7 +79,17 @@ two's complement to represent such numbers, which work straightforward for
 addition and integer multiplication but require special changes for fixed point
 multiplication, division and min/max.
 
-\paragraph{High level language to build circuits.}
+Whereas expanding \textbf{multiplication} and \textbf{min/max} to support
+signed fixed point numbers was not hard (for multiplication we need to fix the
+scaling of the result and for min/max we need to figure out the signedness of
+the inputs), implementing \textbf{division} becomes a challenge.  Most of the
+fast division algorithms are not fit for combinational circuits, which is a
+constraint for the garbled circuits, because they assume circuit loops which we
+will need to unroll, among other optimizations.  For this reason we implemented
+the simplest non-optimized division algorithm: division by repeated subtraction
+with a fixed number of iterations (assuming the worst case).
+
+\subsection{High level language to build circuits.}
 
 While \libgarble{} exposes the functions needed to build circuits corresponding
 to the functions we are interested in, the process becomes cumbersome and error
@@ -131,7 +139,7 @@ Four our implementation we decided to use the same representation for all
 numerical values: two's complement fixed point 32 bit numbers, with 26 bits for
 the integer part and 8 bits for the decimal part.
 
-\paragraph{Broker and Third Party.}
+\subsection{Broker and Third Party.}
 
 The Broker and the Third Party have been written in the Go programming
 language.  The choice of go was motivated on one hand due to the provided
@@ -142,8 +150,6 @@ of both entities.  On the other hand, this language offers the good performance
 of a compiled language with the benefits of memory safety (which is very
 welcomed when dealing with dynamic data structures).
 
-% TODO: Add golang reference?
-
 The communication between the Broker and Third Party (to request the garbling
 of a circuit for Publishers inputs at some particular rounds) happens over RPC
 synchronously.
@@ -151,7 +157,8 @@ synchronously.
 Implementation wise, the Broker requires a regular \MQTT{} Broker server
 {reference: https://github.com/jeffallen/mqtt} with the minor modification that
 any received message whose topic starts with a name space reserved for our
-protocol, will be handled according to the protocol description instead of being forwarded to the subscribers of that topic.
+protocol, will be handled according to the protocol description instead of
+being forwarded to the subscribers of that topic.
 
 The Broker and Third Party are required to maintain replicated data structures
 to store information of every Publisher, Subscriber and function.  Our design
@@ -169,7 +176,7 @@ corresponding publisher ratchet key round, and of requesting the garbling of
 circuits to the Third Party (for those particular Publishers values rounds) to
 evaluate the garbled circuit and send the result to the subscribed Subscribers.
 
-\paragraph{Publisher and Subscriber.}
+\subsection{Publisher and Subscriber.}
 
 The Publisher has been written in C in order to minimize its memory footprint
 as well as its resource consumption, considering that the code may be running
@@ -191,7 +198,7 @@ Broker and Third Party via \MQTT{} messages published and received at a unique
 per-device specific topic.  The device specific topic is formed using the
 Client's (Subscriber or Publisher) public key.
 
-\paragraph{Identity Gates for FreeXOR Compatibility.}
+\subsection{Identity Gates for FreeXOR Compatibility.}
 
 The free XOR optimization in garbled circuits require that for every wire, the
 XOR of the label for bit 0 and bit 1 be a unique secret constant \emph{delta}
@@ -210,7 +217,7 @@ inputs.
 
 % OTHER STUFF
 
-\paragraph{Cryptography choices}
+\subsection{Cryptographic choices}
 
 For all the cryptographic operations we have used the \emph{libsodium} C
 library {reference: https://download.libsodium.org/doc/} which is a fork of
@@ -230,7 +237,16 @@ In particular, the library makes the following choices for the primitives we use
     \emph{Curve25519} curve (that is, \emph{X25519}) is used to obtain a shared
     secret, from which cryptographically secure keys are derived by applying
     the \emph{BLAKE2B-512} hash function.
-  \item \textbf{Encryption}: The \emph{XSalsa20} stream cipher is used for
+  \item \textbf{Encryption}: The \emph{ChaCha20} stream cipher is used for
     encryption with \emph{Poly1305} MAC to provide authenticity.
   \item \textbf{CPRNG}: Uses the \emph{ChaCha20} stream cipher.
 \end{itemize}
+
+Even though \emph{libsodium} allows us to use \emph{AES} for encryption, we
+choose to stick with \emph{ChaCha20} because it is faster in software-only
+implementations (which is the only option available in many IoT devices) and
+because it is not sensitive to cache-collision timing attacks by design.
+
+The construction \emph{ChaCha20-Poly1305} has also been proposed as a standard
+choice of ciphersuit in the upcoming TLS version 1.3, which gives us further
+confidence in the decision to use it in our protocol.

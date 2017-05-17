@@ -20,34 +20,64 @@ different servers.
 
 We have selected 5 numerical operations of varying complexity (\emph{summation,
 multiplicatory, mean, variance, minimum}) to evaluate the cost of the different
-parts of our implementation.  We securely evaluate these functions over the values (encoded as 32 bit fixed point numbers) received from a variable number of Publishers.
+parts of our implementation.  We securely evaluate these functions over the
+values (encoded as 32 bit fixed point numbers) received from a variable number
+of Publishers.
+
+% TODO: Indicate the number of experiments per value
 
 % Plots
+\begin{figure*}
+    \centering
+    \begin{subfigure}[b]{0.32\textwidth}
+        \includegraphics[width=\textwidth]{plots/garble.png}
+        \caption{Garble}
+        \label{fig:garble-time}
+    \end{subfigure}
+    ~ %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc.
+    \begin{subfigure}[b]{0.32\textwidth}
+        \includegraphics[width=\textwidth]{plots/eval.png}
+        \caption{Evaluate}
+        \label{fig:eval-time}
+    \end{subfigure}
+    ~ %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc.
+    \begin{subfigure}[b]{0.32\textwidth}
+        \includegraphics[width=\textwidth]{plots/send.png}
+        \caption{Send}
+        \label{fig:send-time}
+    \end{subfigure}
+    \caption{Mean time required for garbling, evaluating and sending the
+    garbled circuit to the Broker for each function in the microbenchmark, with
+    a 95\% confidence intervals of the samples obtained in the evaluation shown
+    in gray.  Sending includes the marshaling and unmarshaling of the garbled
+    circuit and associated data structures.}\label{fig:circuit-times}
+\end{figure*}
+
 
 \begin{figure}
-  \includegraphics[width=0.5\textwidth]{plots/gates_log.png}
+  \includegraphics[width=0.45\textwidth]{plots/nonxor_gates_log.png}
   \caption{Gates count per function used in the microbenchmarks.}
 \end{figure}
 
 \begin{figure}
-  \includegraphics[width=0.5\textwidth]{plots/enc_dec_inputs.png}
+  \includegraphics[width=0.45\textwidth]{plots/enc_dec_inputs.png}
   \caption{Time spent garbling and evaluating the identity input gates.}
 \end{figure}
 
-\begin{figure}
-  \includegraphics[width=0.5\textwidth]{plots/sum_circuit_2017-05-15.png}
-  \caption{Time spent garbling the circuit, sending the result to the Broker and evaluating it.}
-\end{figure}
+%\begin{figure}
+%  \includegraphics[width=0.45\textwidth]{plots/sum_circuit_2017-05-15.png}
+%  \caption{Time spent garbling the circuit, sending the result to the Broker and evaluating it.}
+%\end{figure}
 
 %\begin{figure}
-%  \includegraphics[width=0.5\textwidth]{plots/sum_circuit_onepub_2017-05-13.png}
+%  \includegraphics[width=0.45\textwidth]{plots/sum_circuit_onepub_2017-05-13.png}
 %  \caption{Time spent garbling the circuit, sending the result to the Broker
 %  and evaluating it removing the overhead of handling the Publishers
 %  connections.}
 %\end{figure}
 
 \begin{figure}
-  \includegraphics[width=0.5\textwidth]{plots/size_log.png}
+  \includegraphics[width=0.45\textwidth]{plots/size_log.png}
   \caption{Size of the garbled circuit and the associated date required by the
   Broker to evaluate it.}
 \end{figure}
@@ -57,16 +87,38 @@ parts of our implementation.  We securely evaluate these functions over the valu
 % TODO: 1. Environmental Berkeley indor sensing data, correlation
 \paragraph{Correlation of two data streams}
 
+% Questions: How many data points to use?
+
 % TODO: 2. Road Volume sensor traffic, evaluation of the expected time to follow a path
 \paragraph{Estimation of time required to follow a path with traffic}
+
+% http://rtmap.metro.net/ <- Not working (2017-05-15).
 
 % TODO: 3. LAX parking lot dataset, statistics
 \paragraph{Continuous statistics of incoming data}
 
+% https://data.lacity.org/dataset/Los-Angeles-International-Airport-LAX-Parking-Lots/dik5-hwp6
+% The dataset provides at a frequency of every 5 minutes and for every one of
+% the 9 parking lots: total, occupied and free parking spaces.
+
+% Ideas: mean, max, min, var over a day (of a specific parking lot for every read).
+%   That's 17280 values per day.
+% Which parking lot had more free spots in average during a day.
+
 % TODO: 4. Turonet, wireless propagation constant, linear regression
 \paragraph{One dimensional linear regression}
 
+% The dataset provides 2.3 million readings collected from sensors with the
+% following values: temperature (degree Celcius), humidity (0-100%), light
+% (Lux: 0-100000), identified by sensor ID.
+
+% Ideas: correlation temperature~humidity, temperature~light.
+% Questions: How many data points to use?
+% Graph: varying number of points, do sampling
+
 % TODO: 5. Smart bill, monthly electricity bill with different cost per hour of the day / threshold.
+
+% ???
 
 % Plots
 
