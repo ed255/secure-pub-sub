@@ -115,10 +115,12 @@ independently.
 
 % TODO: Add Obliv-C reference
 
+\begin{minipage}{\linewidth}
 \lstinputlisting[style=Scheme, frame=single,
 caption={Definition of the \emph{fold} high order function with an example of
 its usage with \emph{min2} to define a new function.}]
 {listings/prelude.lsp}
+\end{minipage}
 
 Where the only \libgarble{} building block is \texttt{min2}, which takes two
 signed integers and returns the smaller one.
@@ -127,9 +129,11 @@ signed integers and returns the smaller one.
 \texttt{l} combining its elements with a function \texttt{f} to build up a
 return value.
 
+\begin{minipage}{\linewidth}
 \lstinputlisting[style=Scheme, frame=single,
 caption={Example of a function over Publishers' values.}]
 {listings/min-example.lsp}
+\end{minipage}
 
 From this function definition the interpreter is capable of constructing the
 circuit that evaluates the function as well as storing the list of publisher
