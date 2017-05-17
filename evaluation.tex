@@ -32,36 +32,38 @@ of Publishers.
     \begin{subfigure}[b]{0.32\textwidth}
         \includegraphics[width=\textwidth]{plots/garble.png}
         \caption{Garble}
-        \label{fig:garble-time}
+        \label{fig:micro-garble-time}
     \end{subfigure}
     ~ %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc.
     \begin{subfigure}[b]{0.32\textwidth}
         \includegraphics[width=\textwidth]{plots/eval.png}
         \caption{Evaluate}
-        \label{fig:eval-time}
+        \label{fig:micro-eval-time}
     \end{subfigure}
     ~ %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc.
     \begin{subfigure}[b]{0.32\textwidth}
         \includegraphics[width=\textwidth]{plots/send.png}
         \caption{Send}
-        \label{fig:send-time}
+        \label{fig:micro-send-time}
     \end{subfigure}
     \caption{Mean time required for garbling, evaluating and sending the
     garbled circuit to the Broker for each function in the microbenchmark, with
     a 95\% confidence intervals of the samples obtained in the evaluation shown
     in gray.  Sending includes the marshaling and unmarshaling of the garbled
-    circuit and associated data structures.}\label{fig:circuit-times}
+    circuit and associated data structures.}\label{fig:micro-times}
 \end{figure*}
 
 
 \begin{figure}
   \includegraphics[width=0.45\textwidth]{plots/nonxor_gates_log.png}
   \caption{Gates count per function used in the microbenchmarks.}
+  \label{micro-nonxor}
 \end{figure}
 
 \begin{figure}
   \includegraphics[width=0.45\textwidth]{plots/enc_dec_inputs.png}
   \caption{Time spent garbling and evaluating the identity input gates.}
+  \label{micro-inputs}
 \end{figure}
 
 %\begin{figure}
@@ -80,7 +82,16 @@ of Publishers.
   \includegraphics[width=0.45\textwidth]{plots/size_log.png}
   \caption{Size of the garbled circuit and the associated date required by the
   Broker to evaluate it.}
+  \label{micro-sizes}
 \end{figure}
+
+We can see that the time spent encrypting and decrypting the inputs (that is,
+garbling and evaluating the input identity gates) makes a significant influence
+in the mean, min/max and sum microbenchmark, being comparable in magnitude to
+the evaluation and garbling time (notice that for sum, the input
+encryption/decryption time is even higher than the garbling/evaluation time).
+We attribute this behavior to the fact that this part of the protocol is
+implemented in go instead of C like the garbling and evaluation.
 
 \subsection{Applications}
 
@@ -89,10 +100,26 @@ of Publishers.
 
 % Questions: How many data points to use?
 
+% Formula:
+
+% We compute the correlation squared to avoid computing the square root in the
+% function circuit, which would be an expensive operation.
+
 % TODO: 2. Road Volume sensor traffic, evaluation of the expected time to follow a path
 \paragraph{Estimation of time required to follow a path with traffic}
 
 % http://rtmap.metro.net/ <- Not working (2017-05-15).
+
+\begin{figure}
+  \includegraphics[width=0.45\textwidth]{plots/stream.png}
+  \caption{Mean time required for garbling, evaluating and sending the garbled
+  circuit to the Broker for computing the correlation and linear regression of
+  data streams, with a 95\% confidence intervals of the samples obtained in the
+  evaluation shown in gray.  Sending includes the marshaling and unmarshaling
+  of the garbled circuit and associated data structures.  Garbling and
+  evaluating includes the time to garble and evaluate the input identity.}
+  \label{stream-times}
+\end{figure}
 
 % TODO: 3. LAX parking lot dataset, statistics
 \paragraph{Continuous statistics of incoming data}
@@ -100,10 +127,32 @@ of Publishers.
 % https://data.lacity.org/dataset/Los-Angeles-International-Airport-LAX-Parking-Lots/dik5-hwp6
 % The dataset provides at a frequency of every 5 minutes and for every one of
 % the 9 parking lots: total, occupied and free parking spaces.
+% That's 288 values per day per parking lot.
 
-% Ideas: mean, max, min, var over a day (of a specific parking lot for every read).
-%   That's 17280 values per day.
-% Which parking lot had more free spots in average during a day.
+% Privacy: Avoid revealing parking lot data at fine granularity, only reveal
+% statistics of the data accumulated throughout the day.  Don't reveal data of
+% individual parking lots, only combined data (except for the lot with
+% more/less free spots)
+
+% Setting: We have 9 Publishers, one for each lot, which send data (current
+% number of free spots, current number of used spots) every 5 minutes.  The
+% Broker accumulates the data of a day and computes the statistics.  This
+% happens once per day.
+
+% Daily statistics (used spots): mean, max, min, var of the number of cars in all the lots combined.
+% Daily statistics (free spots): The marking lot which had more free spots, and the one
+% that had less on average during the day.
+
+% Time garble and time eval includes the time spend encrypting and decrypting
+% the input values.
+
+% "mean time_garble = 199.7968218 time_send = 226.0614956 time_eval = 98.731150 size = 46867188"
+% "max  time_garble = 163.2894558 time_send = 172.3834538 time_eval = 84.937214 size = 33530724"
+% "min  time_garble = 164.4096572 time_send = 165.7728326 time_eval = 84.142138 size = 33530724"
+% "var  time_garble = 500.6605406 time_send = 1055.636931 time_eval = 236.08728 size = 232874164"
+
+% "max_free time_garble = 121.2790726 time_send = 85.043922 time_eval = 67.5544586 size = 17469252"
+% "min_free time_garble = 120.9805436 time_send = 85.586087 time_eval = 67.8169886 size = 17469252"
 
 % TODO: 4. Turonet, wireless propagation constant, linear regression
 \paragraph{One dimensional linear regression}
@@ -115,6 +164,8 @@ of Publishers.
 % Ideas: correlation temperature~humidity, temperature~light.
 % Questions: How many data points to use?
 % Graph: varying number of points, do sampling
+
+% Formula:
 
 % TODO: 5. Smart bill, monthly electricity bill with different cost per hour of the day / threshold.
 
