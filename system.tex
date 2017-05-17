@@ -151,8 +151,8 @@ of a compiled language with the benefits of memory safety (which is very
 welcomed when dealing with dynamic data structures).
 
 The communication between the Broker and Third Party (to request the garbling
-of a circuit for Publishers inputs at some particular rounds) happens over RPC
-synchronously.
+of a circuit for Publishers inputs at some particular rounds) happens over a
+TCP RPC synchronously.
 
 Implementation wise, the Broker requires a regular \MQTT{} Broker server
 {reference: https://github.com/jeffallen/mqtt} with the minor modification that
