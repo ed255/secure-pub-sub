@@ -81,15 +81,14 @@ computing $C$ on their data. \Sim creates $2l|P_C|$ random wire labels $(r_0^0,
 r_0^1), \ldots, (r_{2l|P_C|-1}^0 ,r_{2l|P_C|-1}^1)$; $l$ being the bit-length
 of a publisher's input. We use garbled circuit simulator $\Sim_{GC}$ as a
 blackbox; $\Sim_{GC}$ is the simulator of the projective prv.sim secure
-garbling scheme with circuit $C$ being the side information as described
-in~\cite{}. 
+garbling scheme with circuit $M \circ C$ being the side information as
+described in~\cite{}. 
 
-We constructon \Sim using $\Sim_{GC}$. $\Sim_{GC}$ is the simulator $S$ of the
-projective \Sim receives from \F $\F(M \circ C, \vec{x_C})$, where $M$ is an
-XOR masking function. \Sim sends $\F(M \circ C, \vec{x_C})$ to $\Sim_{GC}$ and
-obtains a fake garbled $GC_{fake}$. \Sim generates a random string $o_r$ of the
-same length as output. \Sim sends $(GC_{fake}, r_0^0, \ldots, r_{2l|P_C|-1}^0,
-o_r)$ to \Adv. As garbled circuits distribution is indepedent of the input wire
+\Sim receives from \F $\F(M \circ C, \vec{x_C})$, where $M$ is an XOR masking
+function. \Sim sends $\F(M \circ C, \vec{x_C})$ to $\Sim_{GC}$ and obtains a
+fake garbled $GC_{fake}$. \Sim generates a random string $o_r$ of the same
+length as output. \Sim sends $(GC_{fake}, r_0^0, \ldots, r_{2l|P_C|-1}^0, o_r)$
+to \Adv. As garbled circuits distribution is indepedent of the input wire
 labels, $GC_{fake}$ is computationally indistinguishable from the $GC$ in the
 real execution. The random output $o_r$ in ideal execution is indistinguishable
 from $o+r$ in the real execution.
