@@ -21,11 +21,12 @@ Our ideal functionality \F interacts with publishers, subscribers, \broker, and
 		\item The honest publishers upload data to \F. The malicious publishers
 			controlled by \Adv may abort (by not sending anything), sends their
 			actual input, or send any arbitrary value that may depend upon their
-			input and auxiliary data. If a publisher value is not received before a
-			time out period, \F uses a nullifying value for its input, e.g., $0$ for
-			addition and $1$ for multiplication. 
-			%We call $i$th publisher's input
-			%$x_i$; $0 \leq i < m$, $m$ being the total number of publishers. 
+			input, other malicious publishers' input, and auxiliary data. If a
+			publisher value is not received before a time out period, \F uses a
+			nullifying value for its input, e.g., $0$ for addition and $1$ for
+			multiplication. 
+			%We call $i$th publisher's input $x_i$; $0 \leq i < m$, $m$ being the
+			%total number of publishers. 
 		
 		\item \garbler uploads to \F a one-time use pseudorandom mask $r$.
 
@@ -44,8 +45,7 @@ Our ideal functionality \F interacts with publishers, subscribers, \broker, and
 
 \paragraph{Real World.} In real world, \F is replaced by our protocol~\ref{}.
 
-\paragraph{Simulator.}
-
+\noindent\textbf{Simulator.}
 %\improvement{Inconsistent wire labels}
 %
 %The intereseting case is when publishers are corrupt and \broker and \garbler are hones-but-curious.
@@ -71,24 +71,34 @@ Our ideal functionality \F interacts with publishers, subscribers, \broker, and
 %
 %\Sim receives from \F a handle $h_C$ and the number of publishers $|P_C|$ whose
 %policy allow $C$. \Sim 
-
-The interesting case is when up to all-but-one publishers are malicious. A
-malicious subscriber only receives output; it can only reveal its own output,
-which is possible in ideal execution as well.
+The interesting case is when up to all-but-one publishers are malicious and are
+colluding with honest-but-curious \broker. A malicous \broker affects
+correctness but not privacy. A malicious subscriber only receives output; it
+can only reveal its own output, which is possible in ideal execution as well.
 
 \Sim receives from \F the number of publishers $|P_C|$ whose policy allow
-computing $C$ on their data. \Sim creates $R = 2l|P_C|$ random wire labels
-$(r_0^0, r_0^1), \ldots, (r_{2l|P_C|-1}^0 ,r_{2l|P_C|-1}^1)$; $l$ being the
-bit-length of a publisher's input. 
+computing $C$ on their data. \Sim creates $2l|P_C|$ random wire labels $(r_0^0,
+r_0^1), \ldots, (r_{2l|P_C|-1}^0 ,r_{2l|P_C|-1}^1)$; $l$ being the bit-length
+of a publisher's input. We use garbled circuit simulator $\Sim_{GC}$ as a
+blackbox; $\Sim_{GC}$ is the simulator of the projective prv.sim secure
+garbling scheme with circuit $C$ being the side information as described
+in~\cite{}. 
 
-\Sim receives from \F $\F(M \circ C, \vec{x_C})$, where $M$ is an XOR masking
-function. \Sim sends $\F(M \circ C, \vec{x_C})$ to $\Sim_{GC}$ and obtains a
-fake garbled $GC_{fake}$. \Sim generates a random string $o_r$ of the same
-length as output. \Sim sends $(GC_{fake}, r_0^0, \ldots, r_{2l|P_C|-1}^0, o_r$
-to \Adv. As garbled circuits distribution is indepedent of the input wire
+We constructon \Sim using $\Sim_{GC}$. $\Sim_{GC}$ is the simulator $S$ of the
+projective \Sim receives from \F $\F(M \circ C, \vec{x_C})$, where $M$ is an
+XOR masking function. \Sim sends $\F(M \circ C, \vec{x_C})$ to $\Sim_{GC}$ and
+obtains a fake garbled $GC_{fake}$. \Sim generates a random string $o_r$ of the
+same length as output. \Sim sends $(GC_{fake}, r_0^0, \ldots, r_{2l|P_C|-1}^0,
+o_r)$ to \Adv. As garbled circuits distribution is indepedent of the input wire
 labels, $GC_{fake}$ is computationally indistinguishable from the $GC$ in the
 real execution. The random output $o_r$ in ideal execution is indistinguishable
 from $o+r$ in the real execution.
+
+In the ideal world, \Sim creates a fake garbled circuit $GC_{fake}$ that
+doesn't use wire labels $(r_0^0, r_0^1), \ldots, (r_{2l|P_C|-1}^0
+,r_{2l|P_C|-1}^1)$ for garbling. Otherwise, \Adv could use $r_0^0, \ldots,
+r_{2l|P_C|-1}^0$ labels to evaluate the circuit on $0^{l|P_C|}$, which would
+allow adversary to distinguish between real and ideal executions.
 
 A malicious publisher can choose arbitrary wire labels in the real execution;
 however, as long as the labels used in garbling are consistent with the labels
