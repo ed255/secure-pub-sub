@@ -1,0 +1,130 @@
+\subsection{Security Definition}
+
+\improvement{Explain later that publishers cannot control which subscribers can
+subscribed and similary susbcriber cannot determine which publishers will be
+used. Publisher either allows data for all subscribvers or noone at all; this
+is how pub/sub model works. However, \broker can control which entieies can
+subscribe.}
+
+\paragraph{Ideal World.}
+Our ideal functionality \F interacts with publishers, subscribers, \broker, and
+\garbler as follows:
+
+\begin{itemize}[leftmargin=*]
+		\item Each publisher sends a \policy to \F and each subscriber sends a
+			subscription message to \F containing subscribed computation $C$. Let $S_C$
+			be the set of $C$'s subscribers. 
+			
+%		Let $p_0, \ldots, p_{m-1}$ be the publishers whose data is required to
+			%		compute $C$. 
+		
+		\item The honest publishers upload data to \F. The malicious publishers
+			controlled by \Adv may abort (by not sending anything), sends their
+			actual input, or send any arbitrary value that may depend upon their
+			input and auxiliary data. If a publisher value is not received before a
+			time out period, \F uses a nullifying value for its input, e.g., $0$ for
+			addition and $1$ for multiplication. 
+			%We call $i$th publisher's input
+			%$x_i$; $0 \leq i < m$, $m$ being the total number of publishers. 
+		
+		\item \garbler uploads to \F a one-time use pseudorandom mask $r$.
+
+		\item \F determines a subset $P' \subset P$ of publishers whose data can be
+			used to compute $C$. \F sends to \broker $P'$, policies of all publishers
+			in $P'$, and $C$.
+
+		\item \broker sends \F a subset $P_C \subset P'$ of publishers whose
+			policies allow $C$.
+			
+		\item If data $x_C$ of all publishers in $P_C$ is enough to compute $C$, \F
+			sends $C(\vec{x_C}) \xor r$ and $r$ to all subscribers in $S_C$,
+			otherwise \F sends empty message $\bot$ to all subscribers in $S_C$. 
+
+\end{itemize}
+
+\paragraph{Real World.} In real world, \F is replaced by our protocol~\ref{}.
+
+\paragraph{Simulator.}
+
+%\improvement{Inconsistent wire labels}
+%
+%The intereseting case is when publishers are corrupt and \broker and \garbler are hones-but-curious.
+%
+%\Adv sends \Sim inputs of all malicious publishers. \Sim uses zero inputs for
+%honest publishers. \Sim generates wire labels for all inputs 
+%
+%\Sim sends all inputs and output mask $r$ to \F and learns
+%$\F(M \circ C, \vec{x})$, whre $M$ is an XOR masking function. \Sim sends $\F(M
+%\circ C, \vec{x})$ to $\Sim_{GC}$ and obtains a fake garbled $GC_{fake}$. \Sim
+%generates a single random wire label for each wire of the circuit. \Sim sends
+%$GC_{fake}$ and wire labels to \Adv.  $\Sim_{GC}$ is computationally
+%indistinguishable from the garbled circuit generated in the real execution, as
+%garbled circuit distribution doesn't depend upon on the input values. The
+%pseudorandom wire labels are also computational indistinguishable from actual
+%wire labels.
+%
+%This proof implies both privacy and correctness as distribution in both the
+%real and ideal world have a negligible difference. 
+%
+%
+%\Sim generates random wire labels for all wires of the circuit $M \circ C$. 
+%
+%\Sim receives from \F a handle $h_C$ and the number of publishers $|P_C|$ whose
+%policy allow $C$. \Sim 
+
+The interesting case is when up to all-but-one publishers are malicious. A
+malicious subscriber only receives output; it can only reveal its own output,
+which is possible in ideal execution as well.
+
+\Sim receives from \F the number of publishers $|P_C|$ whose policy allow
+computing $C$ on their data. \Sim creates $R = 2l|P_C|$ random wire labels
+$(r_0^0, r_0^1), \ldots, (r_{2l|P_C|-1}^0 ,r_{2l|P_C|-1}^1)$; $l$ being the
+bit-length of a publisher's input. 
+
+\Sim receives from \F $\F(M \circ C, \vec{x_C})$, where $M$ is an XOR masking
+function. \Sim sends $\F(M \circ C, \vec{x_C})$ to $\Sim_{GC}$ and obtains a
+fake garbled $GC_{fake}$. \Sim generates a random string $o_r$ of the same
+length as output. \Sim sends $(GC_{fake}, r_0^0, \ldots, r_{2l|P_C|-1}^0, o_r$
+to \Adv. As garbled circuits distribution is indepedent of the input wire
+labels, $GC_{fake}$ is computationally indistinguishable from the $GC$ in the
+real execution. The random output $o_r$ in ideal execution is indistinguishable
+from $o+r$ in the real execution.
+
+A malicious publisher can choose arbitrary wire labels in the real execution;
+however, as long as the labels used in garbling are consistent with the labels
+used for evluation, the honest subscriber output will be indistinguishable in
+real and ideal executions. Our protocol ensures consistent wire labels. 
+
+Our threat model allows for publishers and subscribers to collude aribitrailly.
+\broker and \garbler are semihonest.
+
+
+%\Sim generates a single random wire label for each
+%wire of the circuit. \Sim sends $GC_{fake}$ and wire labels to \Adv.
+%$\Sim_{GC}$ is computationally indistinguishable from the garbled circuit
+%generated in the real execution, as garbled circuit distribution doesn't depend
+%upon on the input values. The pseudorandom wire labels are also computational
+%indistinguishable from actual wire labels.
+%
+%
+%We ensure such consistency
+%using private set intersection cardinarlity between  
+%
+%
+%
+%
+%In the real execution, a
+%malicious publisher can send inconsistent wire labels to \broker and \garbler;
+%which will result in \broker being unable to evalute the garbled circuit. \broker
+%and \garbler use private set intersection cardinality to ensure that \broker and \garbler labels are consistent. 
+%
+%A malicious publisher may send
+%non-random wire labels or inconsistent wire labels. To make the wire labels
+%consistent, in the real execution, \broker and \garbler use private set
+%intersection cardinality to figure out if \broker has a consistent label. As
+%long as this property holds, the value of the labels doesn't affect the output
+%of the honest parties. 
+%
+%
+%A malicious publisher may not
+%send a random wire label in the real execution.
