@@ -4,7 +4,7 @@
 \improvement{Maliciosu \broker doesn't affect privacy, online correctness}
 
 
-\begin{figure}[h]
+\begin{figure*}[h]
 \begin{mdframed}[style=myframe]
 
 %\begin{itemize}[leftmargin=*, itemsep=6pt]
@@ -14,10 +14,6 @@
  
 	\item Each new publisher sends \broker a \policy specifying allowed
 		computations on its data.
-%		and generates a truly random seed $s$ and send it to \garbler.
-
-%	\item All publishers and subscribers establish an authenticated encrypted
-%		channel with \broker and through \broker with \garbler.
 
 \end{itemize}
 
@@ -27,12 +23,6 @@
 	\item To subscribe computation $C$, subscriber sends a subscription request
 		containing $C$ to \broker. If \broker allows subscriber to learn $C$'s
 		output, it adds the subscriber to a list of $C$'s subscribers. 
-
-		%and requests an output mask $r$ for computation $C$ from \garbler.
-
-%	\item \garbler sends subscriber a pseudorandom mask $r$ for computation $C$;
-%		generating a new mask if this is the first subscription for computation
-%		$C$.
 
 \end{itemize}
 
@@ -70,14 +60,16 @@
 		
 	\item \garbler sends $r$ to all subscribers in the set $S_C$ and $GC$ to
 		\broker along with identifiers for publishers for which it hard-wired
-		nullifying values. 
-		
-%		\garbler checks if it has received wire labels, $w_0$ and $w_1$ for a bit
-		%		$b$, from all publishers in $P_C$. If so, it generates garbled circuit,
-		%		$GC$ for $XOR \circ C$, composition of $XOR$ masking function and $C$
-		%		and sends garbled circuit to \broker. $XOR$ adds a pseudorandom mask
-		%		$r$ to the output of $C$.
+		nullifying values.
 
+	\item For every bit $b$ of the $C$ inputs, \garbler and \broker run a
+		private set intersection \emph{cardinality} (PSI-C) protocol to determine
+		wire labels consistency, i.e., if \broker input label for bit $b$, $w_b$,
+		is one of the two \garbler labels for bit $b$, $w_0$ and $w_1$. If PSI-C
+		outputs $1$, then the labels are consistent and if it's $0$ then the labels
+		are inconsistent. \garbler will use nullifying values for all inconsistent
+		wire labels. 
+		
 	\item \broker evaluates the garbled circuit using wire labels sent by
 		publishers in set $P_C$ ignoring labels for which \garbler hard-wired
 		nullifying values, obtains masked output $o \xor r$, and sends $o \xor r$
@@ -90,13 +82,18 @@
 \end{mdframed}
 \caption{Basic Protocol}
 \label{fig:basicprotocol}
-\end{figure}
+\end{figure*}
 
-\subsection{Basic Protocol}
+
+\being{itemize}[leftmargin=*]
+
+	\item 
+
+\end{itemize}
+
+
 
 \begin{figure}[h]
-	\caption{Basic Protocol}
-\label{fig:basicprotocol}
 \begin{mdframed}[style=myframe]
 
 %\begin{itemize}[leftmargin=*, itemsep=6pt]
@@ -163,6 +160,8 @@
 \end{itemize}
 
 \end{mdframed}
+\caption{Improved Protocol}
+\label{fig:basicprotocol}
 \end{figure}
 
 \paragraph{Forward Security.}
