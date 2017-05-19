@@ -148,13 +148,14 @@ ratchet key?}
 
 		\item Generate a truly random key $K_0$.
 
-		\item Generate, using KDF with key $K_0$, a pseudorandom seed $s_0$ and a
-			pseudorandom key for the ratchet round $1$. Seed $s_0$ is used to
-			generate pseudorandom strings during ratchet round $0$.
+		\item Generate, using pseudorandom function (PRF) with key $K_0$, a
+			pseudorandom seed $s_0$ and a pseudorandom key for the ratchet round $1$.
+			Seed $s_0$ is used to generate pseudorandom strings during ratchet round
+			$0$.
 
-		\item At round $r$, using KDF with key $K_r$, generate a pseudorandom seed
-			$s_r$ and key for ratchet round $r+1$. Seed $s_r$ is used to generate
-			pseudorandom strings during ratchet round $r$.
+		\item At round $i$, using PRF with key $K_i$, generate a pseudorandom seed
+			$s_i$ and key for ratchet round $i+1$. Seed $s_i$ is used to generate
+			pseudorandom strings during ratchet round $i$.
 
 \end{itemize}
 
