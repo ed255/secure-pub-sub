@@ -26,14 +26,14 @@
 
 \usepackage[framemethod=TikZ]{mdframed}
 \mdfdefinestyle{myframe}{%
-%    linecolor=black,
-%    outerlinewidth=0pt,
+    linecolor=cyan!5!white,
+    outerlinewidth=0.5pt,
     roundcorner=10pt,
     innertopmargin=\baselineskip,
     innerbottommargin=\baselineskip,
     innerrightmargin=10pt,
     innerleftmargin=10pt,
-    backgroundcolor=gray!10!white
+    backgroundcolor=gray!15!white
 }
 
 \usepackage{xargs}                      % Use more than one optional parameter in a new commands
@@ -47,10 +47,10 @@
 
 %************************* Variables ************************* 
 
-\newcommand{\initialize}{\textbf{\textsf{Initialize}\xspace}}
-\newcommand{\publish}{\textbf{\textsf{Publish}\xspace}}
-\newcommand{\subscribe}{\textbf{\textsf{Subscribe}\xspace}}
-\newcommand{\process}{\textbf{\texttt{Process}\xspace}}
+\newcommand{\initialize}{\textbf{\color{blue}\textsf{Initialize}\xspace}}
+\newcommand{\publish}{\textbf{\color{blue}\textsf{Publish}\xspace}}
+\newcommand{\subscribe}{\textbf{\color{blue}\textsf{Subscribe}\xspace}}
+\newcommand{\process}{\textbf{\color{blue}\texttt{Process}\xspace}}
 
 \newcommand{\broker}{\texttt{Broker}\xspace}
 \newcommand{\garbler}{\texttt{Garbler}\xspace}
@@ -63,4 +63,5 @@
 
 \newcommand{\F}{\ensuremath{\mathcal{F}}}
 %\newcommand{\vect}[1]{\ensuremath{\overline{#1}}}
+
 

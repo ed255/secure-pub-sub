@@ -1,16 +1,14 @@
 \section{Protocol}
 \label{sec:protocol}
 
-\improvement{Maliciosu \broker doesn't affect privacy, online correctness}
+\improvement{Malicious \broker doesn't affect privacy, online correctness}
 
 
 \begin{figure*}[h]
 \begin{mdframed}[style=myframe]
 
-%\begin{itemize}[leftmargin=*, itemsep=6pt]
-
 \initialize
-\begin{itemize}[leftmargin=*]
+\begin{itemize}[leftmargin=18pt,itemsep=4pt,topsep=4pt]
  
 	\item Each new publisher sends \broker a \policy specifying allowed
 		computations on its data.
@@ -18,7 +16,7 @@
 \end{itemize}
 
 \subscribe
-\begin{itemize}[leftmargin=*]
+\begin{itemize}[leftmargin=18pt,itemsep=4pt,topsep=4pt]
 
 	\item To subscribe computation $C$, subscriber sends a subscription request
 		containing $C$ to \broker. If \broker allows subscriber to learn $C$'s
@@ -27,7 +25,7 @@
 \end{itemize}
 
 \publish
-\begin{itemize}[leftmargin=*]
+\begin{itemize}[leftmargin=18pt,itemsep=4pt,topsep=4pt,after=]
 		
 	\item To publish $k$th value, publisher generates two pseudorandom wire
 		labels, $w_0$ and $w_1$, for each bit of the value. 
@@ -38,7 +36,7 @@
 \end{itemize}
 
 \process
-\begin{itemize}[leftmargin=*]
+\begin{itemize}[leftmargin=18pt,itemsep=4pt,topsep=4pt]
 
 	\item \broker waits for a specified time period $t$ to receive input wire
 		labels, a single label $w_b$ for a bit $b$, from a subset of publishers
@@ -62,13 +60,13 @@
 		\broker along with identifiers for publishers for which it hard-wired
 		nullifying values.
 
-	\item For every bit $b$ of the $C$ inputs, \garbler and \broker run a
-		private set intersection \emph{cardinality} (PSI-C) protocol to determine
-		wire labels consistency, i.e., if \broker input label for bit $b$, $w_b$,
-		is one of the two \garbler labels for bit $b$, $w_0$ and $w_1$. If PSI-C
-		outputs $1$, then the labels are consistent and if it's $0$ then the labels
-		are inconsistent. \garbler will use nullifying values for all inconsistent
-		wire labels. 
+	\item For every bit $b$ of the $C$ inputs, \garbler and \broker run a private
+		set intersection \emph{cardinality} (PSI-C) protocol to determine wire
+		labels consistency, i.e., if \broker input label for bit $b$, $w_b$, is one
+		of the two \garbler labels for bit $b$, $w_0$ and $w_1$. If PSI-C outputs
+		$1$, then the labels are consistent and if it's $0$ then the labels are
+		inconsistent. \garbler will use nullifying values for inputs of all
+		publishers with at least $1$ inconsistent wire label. 
 		
 	\item \broker evaluates the garbled circuit using wire labels sent by
 		publishers in set $P_C$ ignoring labels for which \garbler hard-wired
@@ -88,10 +86,8 @@
 \begin{figure}[h]
 \begin{mdframed}[style=myframe]
 
-%\begin{itemize}[leftmargin=*, itemsep=6pt]
-
 \initialize
-\begin{itemize}[leftmargin=*]
+\begin{itemize}[leftmargin=*,itemsep=4pt,topsep=4pt]
  
 	\item Each new publisher generates and sends to \garbler a truly random seed
 		$s$. This seed will be used to create wire labels without interaction.
@@ -99,7 +95,7 @@
 \end{itemize}
 
 \subscribe
-\begin{itemize}[leftmargin=*]
+\begin{itemize}[leftmargin=*,itemsep=4pt,topsep=4pt]
 
 	\item In addition to registering subscription with \broker, subscribers for a
 		computation $C$ also register with \garbler. \garbler sends a truly
@@ -110,7 +106,7 @@
 \end{itemize}
 
 \publish
-\begin{itemize}[leftmargin=*]
+\begin{itemize}[leftmargin=*,itemsep=4pt,topsep=4pt]
 		
 	\item To publish $k$th value, publisher generates two pseudorandom wire
 		labels, $w_0$ and $w_1$, using seed $s$, for each bit of the value.  $w_0$
@@ -124,7 +120,7 @@
 \end{itemize}
 
 \process
-\begin{itemize}[leftmargin=*]
+\begin{itemize}[leftmargin=*,itemsep=4pt,topsep=4pt]
 
 	\item \garbler independently generates input wire labels using seed $s$ from
 		each publisher contributing input and an output mask $r$ using seed $s'$
@@ -132,8 +128,35 @@
 
 \end{itemize}
 
+\vspace{8pt}
+
+\textbf{Forward Secure Seeds}
+\vspace{4pt}
+
+Following procedure ensures that seeds $s$ and $s'$ used above are forward
+	secure, i.e., compromise of seed does not affect the confidentiality of past
+	data. We use Signal, a popular secure messaging protocol, key ratcheting
+	protocol for forward security.
+
+\begin{itemize}[leftmargin=*]
+
+	\item Generate a truly random key $K_0$.
+
+	\item Generate, using pseudorandom function (PRF) with key $K_0$, a
+		pseudorandom seed $s_0$ and a pseudorandom key for the ratchet round $1$.
+		Seed $s_0$ is used to generate pseudorandom strings during ratchet round
+		$0$.
+
+	\item At round $i$, using PRF with key $K_i$, generate a pseudorandom seed
+		$s_i$ and key for ratchet round $i+1$. Seed $s_i$ is used to generate
+		pseudorandom strings during ratchet round $i$.
+
+
+
+\end{itemize}
+
 \end{mdframed}
-\caption{Improved Protocol}
+\caption{Reduced Communication Extension with Forward Security}
 \label{fig:basicprotocol}
 \end{figure}
 
@@ -163,6 +186,67 @@ ratchet key?}
 \caption{Forward Secure Seeds for Improved Protocol}
 \label{fig:basicprotocol}
 \end{figure}
+
+\noindent\textbf{Efficient Wire Labels Consistency Check.} In our basic
+protocol, described in Figure~\ref{fig:basicprotocol}, we execute a new
+instance of private set intersection \emph{cardinality} protocol for every
+input bit of the circuit, which is expensive.  We present a more efficient wire
+label consistency protocol:
+
+For every input bit $b$ of circuit $C$, \garbler has both wire labels $w_0$ and
+$w_1$, we call the set of these labels $W_\garbler$ and \broker has a wire
+label $w_b$, we call the set of these labels $W_\broker$. Input consistency
+check ensures that $w_b$ is either $w_0$ or $w_1$, otherwise the \broker would
+be unable to evaluate the garbled circuit.
+
+\begin{figure}[h]
+\begin{mdframed}[style=myframe]
+
+\begin{itemize}[leftmargin=*,itemsep=4pt]
+
+	\item \broker and \garbler share an ephemeral seed $s''$ for wire label
+		consistency check before every computation $C$.
+
+	\item \broker generates a pseudorandom mask $r_b$, using seed $s''$, and
+		computes $w_b \xor r_b$. We call the set of these masked input labels
+		$R_\broker$. 
+
+	\item \garbler generates the same pseudorandom mask $r_b$, using seed
+		$s''$, and computes $w_0 \xor r_b$ and $w_1 \xor r_b$. We call the set of
+		these masked labels $R_\garbler$.
+
+	\item \broker and \garbler runs private set intersection (PSI) protocol with
+		$R_\broker$ and $R_\garbler$ as inputs and only \broker receives the
+		intersection.
+		
+	\item	If cardinality of $R_\broker \cap R_\garbler$ is $|R_\broker| =
+		|R_\garbler / 2|$, then all wire labels are consistent. 
+
+		\item If cardinality of $R_\broker \cap R_\garbler$ is less than
+			$|R_\broker| = |R_\garbler / 2|$, then $|R_\broker| - |R_\broker \cap
+			R_\garbler|$ labels are inconsistent. In this case:
+
+			\begin{itemize}[leftmargin=*,itemsep=4pt,topsep=4pt]
+
+					\item \broker unmasks all masked labels in $R_\broker \cap
+						R_\garbler$ to learn $W_\broker \cap W_\garbler$.
+
+					\item \broker sends all inconsistent labels $W_\broker \setminus
+						(W_\broker \cap W_\garbler)$ to \garbler. 
+						
+					\item \garbler hard-wires in the garbled circuit $GC$ nullifying
+						values for inputs of all publishers with at least $1$ inconsistent
+						label.
+						
+			\end{itemize}
+			
+\end{itemize}
+
+\end{mdframed}
+\caption{Efficient Wire Label Consistency Protocol}
+\label{fig:econsistency}
+\end{figure}
+
 
 \paragraph{Garbled Circuit XOR Compatibility.}
 
