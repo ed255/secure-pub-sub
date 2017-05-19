@@ -1,7 +1,14 @@
 \begin{figure}[h]
+	\centering
 \begin{mdframed}[style=myframe]
 
 \begin{itemize}[leftmargin=*,itemsep=4pt]
+
+	\item[] For every input bit $b$ of circuit $C$, \garbler has both wire labels
+		$w_0$ and $w_1$, we call the set of these labels $W_\garbler$ and \broker
+		has a wire label $w_b$, we call the set of these labels $W_\broker$. Input
+		consistency check ensures that $w_b$ is either $w_0$ or $w_1$.
+	%	, otherwise the \broker would be unable to evaluate the garbled circuit.
 
 	\item \broker and \garbler share an ephemeral seed $s''$ for wire label
 		consistency check before every computation $C$.
@@ -14,7 +21,7 @@
 		$s''$, and computes $w_0 \xor r_b$ and $w_1 \xor r_b$. We call the set of
 		these masked labels $R_\garbler$.
 
-	\item \broker and \garbler runs private set intersection (PSI) protocol with
+	\item \broker and \garbler runs private-set-intersection (PSI) protocol with
 		$R_\broker$ and $R_\garbler$ as inputs and only \broker receives the
 		intersection.
 		
@@ -42,6 +49,6 @@
 \end{itemize}
 
 \end{mdframed}
-\caption{Efficient Wire Label Consistency Protocol}
-\label{fig:econsistency}
+\caption{Efficient Wire Label Consistency Checking Protocol}
+\label{fig:label_consistency}
 \end{figure}

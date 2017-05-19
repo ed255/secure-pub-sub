@@ -1,35 +1,56 @@
 \section{Protocol}
 \label{sec:protocol}
 
-We describe a basic protocol first, for each of understanding, followed up by
-extensions for reducing communication and an efficient protocol to handle
-malicious publishers disrupting the computation. We present a simulator for the
-basic protocol to prove that a real world adversary cannot do more harm then a
-simulator can do in the ideal world (Definition~\ref{def:security}. We also
-describe security of extensions. We describe our system in
-Section~\ref{sec:system}, which is not a mere implementation of our protocol
-with extensions; we use a range of system techniques to build a practical
-system using our protocol as a foundation. 
+We describe a base secure publish-process-subscribe protocol first, for ease of
+understanding and reasoning about security, followed by extensions for reducing
+communication and efficiently handling malicious publishers disrupting the
+computation.  We present a simulator for the base protocol to prove that a real
+world adversary cannot do more harm then a simulator can do in the ideal world
+(Definition~\ref{def:security}). We also describe security of extensions. We
+describe our system in Section~\ref{sec:system}, which is not a mere
+implementation of our protocol. We developed a range of system techniques, such
+as, developing a new high-level functional language to describe computations
+and generate circuits, extending garbled circuits library libgarble, identity
+gates to make our protocol compatible with FreeXOR optimization, and establish
+authenticated and encrypted channel on top of MQTT. 
 
-We assume authenticated encrypted channels between publishers, subscribers with
-\broker, \garbler. However, in our system, publishers and subscribers
-communicate directly only with \broker and communicate indirectly with \garbler
-through \broker. This is because we want to comply with MQTT protocol.
+We assume direct authenticated encrypted channels in this section.  However, in
+our system, publishers and subscribers communicate directly only with \broker
+and communicate indirectly with \garbler through \broker as showing in
+Figure~\ref{fig:pps-out}. This allows us to implement our protocol on top of
+MQTT.
 
-We describe our protocol. We describe system in Section~\ref{def:system}, and
-we solve many issues that come into building a system.
+\subsection{Base Protocol}
+\input{base_protocol}
 
-We provide a simulator for our basic protocol, but after every extension we
-describe security again.
+The base protocol uses direct communication with \garbler for ease of
+explanation; publishers and subscribers in our system communicate with \garbler
+only through \broker. This ensures compatibility with a standard topic-based
+publish-subscribe system where publishers and subscribers communicate only
+through \broker.
 
-\improvement{Malicious \broker doesn't affect privacy, online correctness}
+Each new publisher initializes by sending its \policy specifying allowed
+computations on its data. To subscribe computation $C$, a subscriber sends a
+subscription request to \broker.  To publish a value, publisher generates two
+wire labels $w_0$ and $w_1$ for every bit $b$ of the value, sends both labels
+$w_0$ and $w_1$ to \garbler, and only $w_b$ to \broker. \broker waits for a
+specified time period to receive all input wire labels after which \broker
+requests \garbler to garble the circuit for $XOR \circ C$.  A malicious
+publisher can send inconsistent labels for a wire to \broker and \garbler,
+e.g., $w_0$ and $w_1$ to \garbler and a random wire label $w_r$ to \broker.
+Inconsistent labels prevent \garbler from correctly evaluating the garbled
+circuit. We use private-set-intersection-cardinality (PSI-C) to determine
+inconsistent labels. \garbler hard-wires nullifying values for publishers who
+sent at least $1$ inconsistent label and publishers who didn't sent labels to
+either \broker or \garbler. \garbler garbles the circuit such that evaluating
+it outputs a masked output and send it to \broker.  Therefore, when \broker
+evaluates the garbled circuit, it only learns a masked output, which it
+forwards to $C$'s subscribers. \garbler sends the output mask to $C$'s
+subscribers, who can then unmask the output.
 
-\subsection{Basic Protocol}
-\input{basic_protocol}
-
-\subsection{Security Proof of Basic Protocol}
+\subsection{Security Proof of Base Protocol}
 We describe a simulator \Sim that simulates the view of the \Adv in the real
-world execution of our basic protocol of Figure~\ref{fig:basicprotocol}. Our
+world execution of our base protocol of Figure~\ref{fig:baseprotocol}. Our
 security definition~\ref{def:security} and simulator \Sim ensures both
 confidentiality and correctness.
 
@@ -42,17 +63,26 @@ reveal its own output, which is also possible in the ideal world execution.\\[6p
 \subsection{Reduced Communication Extension}
 \input{extended_protocol}
 
-\subsection{Efficient Wire Labels Consistency Check} In our basic
-protocol, described in Figure~\ref{fig:basicprotocol}, we execute a new
-instance of private set intersection \emph{cardinality} protocol for every
-input bit of the circuit, which is expensive.  We present a more efficient wire
-label consistency protocol:
+\subsection{Efficient Wire Labels Consistency Check} 
 
-For every input bit $b$ of circuit $C$, \garbler has both wire labels $w_0$ and
-$w_1$, we call the set of these labels $W_\garbler$ and \broker has a wire
-label $w_b$, we call the set of these labels $W_\broker$. Input consistency
-check ensures that $w_b$ is either $w_0$ or $w_1$, otherwise the \broker would
-be unable to evaluate the garbled circuit.
+In base protocol, Figure~\ref{fig:baseprotocol}, we execute a new instance of
+private-set-intersection-cardinality (PSI-C) protocol for every input
+bit of the circuit, which is expensive.  We present a more efficient wire
+labels consistency checking protocol in Figure~\ref{fig:label_consistency}. 
+
+This protocol uses private-set-intersection (PSI) from~\cite{Pinkas0Z14} as
+opposed to private-set-intersection-cardinality (PSI-C) and only \broker learns
+the intersection.  Running PSI alone cannot detect if a publisher sends valid
+labels for different input bits, e.g., both labels $w_0$ and $w_1$ for input
+bit $b$ of $C$ to \garbler and $w'_{b'}$ label for a different input bit $b'$
+of $C$ to \broker. To address this issue, we use PSI over masked labels.
+\garbler and \broker shares a truly random seed $s''$ with the first message of
+the PSI protocol.  \garbler and \broker generates a pseudorandom mask $r_b$ for
+each input bit $b$ of $C$ from this seed; \broker computes masked labels $w_b
+\xor r_b$ for input bit $b$ and \garbler computes masked labels $w_0 \xor r_b$
+and $w_1 \xor r_b$ for each bit $b$. \broker learns all the consistent wire
+labels and requests \garbler to hard-wire nullifying values for all publishers
+with at least $1$ inconsistent wire label. 
 
 \input{input_consistency_protocol}
 
