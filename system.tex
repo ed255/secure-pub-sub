@@ -25,7 +25,19 @@ ratchet key.  In the case of Subscribers, for every function subscription, a
 key exchange is performed to derive a key to encrypt the function ratchet key
 sent from the Third Party to the Subscriber.
 
-% TODO: Explain ratchet key.
+The use of shared ratchet keys between Publishers and the \garbler, and between
+the Subscribers and the \garbler allows us to maintain forward secrecy at the
+published value level and at the function output level at a very low cost.
+With this we achieve the property that if an attacker gets hold of the secret
+keys from any participantin the protocol, this attacker will not be able to
+decrypt past values even if they have recorded all previous communications.
+Ratchet keys work by advancing a secret key every at round (by means of using
+the using the preimage-resistance of a cryptographic hash function).  At any
+round, a seed can be derived from a ratchet key to be used to generate
+pseudorandom byte strings.  The idea of using ratchet keys to achieve forward
+secrecy has been popularized by the Signal messaging protocol (already analyzed
+by the security research community TODO: add 2 cites), from which we take
+inspiration.
 
 This design achieves the desired cryptographic properties of TLS for selected
 parts of the messages underlying the \MQTT{} communication, allowing the Broker
@@ -44,8 +56,14 @@ data encoded in base64.  A possible improvement in performance and bandwidth
 usage would consist on replacing this encoding for a binary one such as
 Protocol Buffers.
 
-% TODO: Add choice of block cipher by libgarble (AES with 128 block size), and
-% how it affects the size of circuits and published values.
+The block cipher behind the garbled circuit in our implementation is AES-128
+(both blocks and keys are 128 bits).  In particular, the block size has a
+direct relation to the size of the garbled circuit (as every non-XOR gate
+requires a fixed number of cipher blocks) as well as the required bandwidth
+between Publishers and the Broker, and between Subscribers and the Broker.  In
+particular, for every secret bit transferred from or to a client (which will
+either be an input bit or an output bit of the garbled circuit) will be
+expanded to 128 bits.
 
 \subsection{Extending \libgarble.}
 
