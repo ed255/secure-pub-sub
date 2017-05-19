@@ -11,8 +11,10 @@ operations in the \broker and \garbler, which run together in a computer
 running Arch Linux (kernel 4.8.17-grsec) with an Intel Core i7-6600U CPU with
 16GB of RAM.  In order to isolate the performance influence of the \broker and
 the \garbler, we have serialized the garbling and evaluation of the garbled
-circuit operations, mimicking the situation in which the \broker and \garbler
-are run on different servers.
+circuit operations (forbidding evaluation operations while the \garbler is
+garbling), mimicking the situation in which the \broker and \garbler are run on
+different servers.  We also forbid concurrent garbling operations and
+concurrent evaluation operations to avoid high fluctuations in the measures.
 
 Since the \broker and the \garbler are running on the same computer, we won't
 observe the delay introduced by transferring the garbled circuit over a
@@ -372,6 +374,24 @@ about 50 \% as in the rank calculated in the \emph{daily statistics of airport
 parking lot} to about 80\% as in the \emph{wireless propagation constant}
 application with 25 nodes.
 
+The total time required for computing the functions securely in our different
+applications experiments range from about a second as in the \emph{daily
+statistics of airport parking lot} to a about 13 seconds as in the
+\emph{correlation of environmental data}.  Considering the fraction of time
+spent sending the garbled circuit in the more costly application
+configurations, we could get a good estimate of the total time by just knowing
+the number of non-XOR gates used (which would determine the size of the garbled
+circuit) and the network bandwidth available from \broker to \garbler.
+
+The results obtained are perfectly suitable for computing several functions
+like the ones presented in the applications in a \broker-\garbler pair
+periodically.  For example, 6 different applications similar to the ones shown
+could be running every minute.  In our experiments, all the garbling and
+evaluating steps have been computed in serial in order to get result measures
+with the minimum fluctuation, but in a real system, several functions could be
+run at the same time allowing for concurrent garbling and evaluation making use
+of all the CPU cores available.
+
 The garbling and evaluation of the identity gates could be optimized by
 incorporating the operations in the C code of libgarble.  Even though the
 golang implementation of the AES encryption and decryption functions use the
@@ -381,6 +401,3 @@ natively with 128 bits data types (the size of an AES block) by using the Intel
 SSE2 extensions, thus not requiring any conversion during
 encryption/decryption.
 
-% TODO: Explain fraction of time spent on garbling, sending and evaluating.
-
-% TODO: Add more stuff here!
