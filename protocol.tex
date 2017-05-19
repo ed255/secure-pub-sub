@@ -85,14 +85,6 @@
 \end{figure*}
 
 
-\being{itemize}[leftmargin=*]
-
-	\item 
-
-\end{itemize}
-
-
-
 \begin{figure}[h]
 \begin{mdframed}[style=myframe]
 
@@ -101,26 +93,20 @@
 \initialize
 \begin{itemize}[leftmargin=*]
  
-	\item Each new publisher sends \broker a policy specifying allowed
-		computations on its data and generates a truly random seed $s$ and send
-		it to \garbler.
-
-	\item All publishers and subscribers establish an authenticated encrypted
-		channel with \broker and through \broker with \garbler.
+	\item Each new publisher generates and sends to \garbler a truly random seed
+		$s$. This seed will be used to create wire labels without interaction.
 
 \end{itemize}
 
 \subscribe
 \begin{itemize}[leftmargin=*]
 
-	\item To subscribe computation $C$, subscriber sends a subscription request
-	  containing $C$ to \broker and requests an output masking seed from
-	  \garbler.
-
-	\item \garbler sends a truly random seed $s'$ to the subscriber for
-		computation $C$; generating a new seed if this is the first subscription
-		for computation $C$.
-
+	\item In addition to registering subscription with \broker, subscribers for a
+		computation $C$ also register with \garbler. \garbler sends a truly
+		random seed $s'$ for computation $C$ and send it to every subscriber who
+		subscribes for $C$; generating a new seed for the first subscription for
+		computation $C$.
+		
 \end{itemize}
 
 \publish
@@ -140,22 +126,9 @@
 \process
 \begin{itemize}[leftmargin=*]
 
-	\item Once \broker has wire labels for all publishers' inputs required for
-		computation $C$, it requests \garbler to garble a circuit for $C$.  
-  
 	\item \garbler independently generates input wire labels using seed $s$ from
-		each publisher contributing input and an output mask $m$ using seed $s'$
-		for each output bit.
-
-	\item \garbler generates garbled circuit for $M \circ C(\cdot)$, composition
-		of masking function $M:XOR$ and computation $C$, and sends it to \broker.
-
-	\item \broker evaluates the garbled circuit using wire labels sent by
-		publishers, obtains masked output $o \xor m$, and send $o \xor m$ to all
-		subscribers of computation $C$.
-  
-	\item Subscribers generate the mask $m$ using the seed $s'$ and unmask the
-		output $o$.
+		each publisher contributing input and an output mask $r$ using seed $s'$
+		for the output.
 
 \end{itemize}
 
@@ -168,6 +141,8 @@
 \unsure{Do we have to generate seed and ratchet key? Can't we use the seed as a
 ratchet key?}
 
+\begin{figure}[h]
+\begin{mdframed}[style=myframe]
 
 \begin{itemize}[leftmargin=*]
 
@@ -182,6 +157,11 @@ ratchet key?}
 			pseudorandom strings during ratchet round $r$.
 
 \end{itemize}
+
+\end{mdframed}
+\caption{Forward Secure Seeds for Improved Protocol}
+\label{fig:basicprotocol}
+\end{figure}
 
 \paragraph{Garbled Circuit XOR Compatibility.}
 
