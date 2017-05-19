@@ -1,6 +1,21 @@
 \section{Protocol}
 \label{sec:protocol}
 
+We describe a basic protocol first, for each of understanding, followed up by
+extensions for reducing communication and an efficient protocol to handle
+malicious publishers disrupting the computation. We present a simulator for the
+basic protocol to prove that a real world adversary cannot do more harm then a
+simulator can do in the ideal world (Definition~\ref{def:security}. We also
+describe security of extensions. We describe our system in
+Section~\ref{sec:system}, which is not a mere implementation of our protocol
+with extensions; we use a range of system techniques to build a practical
+system using our protocol as a foundation. 
+
+We assume authenticated encrypted channels between publishers, subscribers with
+\broker, \garbler. However, in our system, publishers and subscribers
+communicate directly only with \broker and communicate indirectly with \garbler
+through \broker. This is because we want to comply with MQTT protocol.
+
 We describe our protocol. We describe system in Section~\ref{def:system}, and
 we solve many issues that come into building a system.
 
@@ -13,6 +28,15 @@ describe security again.
 \input{basic_protocol}
 
 \subsection{Security Proof of Basic Protocol}
+We describe a simulator \Sim that simulates the view of the \Adv in the real
+world execution of our basic protocol of Figure~\ref{fig:basicprotocol}. Our
+security definition~\ref{def:security} and simulator \Sim ensures both
+confidentiality and correctness.
+
+The interesting case is when a subset of publishers are malicious and are
+colluding with honest-but-curious \broker. \garbler is non-colluding
+honest-but-curious. A malicious subscriber only receives output; it can only
+reveal its own output, which is also possible in the ideal world execution.\\[6pt]
 \input{simulator}
 
 \subsection{Reduced Communication Extension}
