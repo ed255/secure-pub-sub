@@ -43,8 +43,8 @@ garbled circuit simulator $\Sim_{GC}$ as a blackbox; $\Sim_{GC}$ is the
 simulator of the projective prv.sim secure garbling scheme with circuit $M
 \circ C$ being the side information as described in~\cite{}. 
 
-\Sim receives from \F $\F(M \circ C, \vec{x_C})$, where $M$ is an XOR masking
-function. \Sim sends $\F(M \circ C, \vec{x_C})$ to $\Sim_{GC}$ and obtains a
+\Sim receives from \F $\F(M \circ C, \vec{x}_C)$, where $M$ is an XOR masking
+function. \Sim sends $\F(M \circ C, \vec{x}_C)$ to $\Sim_{GC}$ and obtains a
 fake garbled $GC_{fake}$. \Sim generates a random string $o_r$ of the same
 length as output. \Sim sends $(GC_{fake}, r_0^0, \ldots, r_{2l|P_C|-1}^0, o_r)$
 to \Adv. As garbled circuits distribution is independent of the input wire

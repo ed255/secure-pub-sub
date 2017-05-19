@@ -2,14 +2,8 @@
 \label{sec:definition}
 
 \improvement{Explain how pub/sub works}
-
-\subsection{Threat Model} We assume that the adversary can \emph{maliciously}
-compromise a subset of subscribers and a subset of publishers. The adversary
-can also \emph{passively} compromise either \broker or \garbler, but not both.
-Malicious subscribers and publishers can collude either with \garbler or
-\broker, but not both.
-
-\subsection{Definition}
+Before defining security, we present threat model that our definition needs to
+capture.
 
 \improvement{Explain later that publishers cannot control which subscribers can
 subscribed and similary susbcriber cannot determine which publishers will be
@@ -17,11 +11,22 @@ used. Publisher either allows data for all subscribvers or noone at all; this
 is how pub/sub model works. However, \broker can control which entieies can
 subscribe.}
 
+\subsection{Threat Model} We assume that the adversary can \emph{maliciously}
+compromise a subset of subscribers and a subset of publishers and
+\emph{passively} compromise either \broker or \garbler, but not both.
+Malicious subscribers and publishers can collude either with \garbler or
+\broker, but not both.
+
+\subsection{Definition}
+
+We define security for a secure publish-process-subscribe protocol in
+REAL/IDEAL paradigm. Our definition captures both confidentilaity and
+correctness against adversary discussed above in the threat model.\\[6pt]
 \noindent\textbf{Ideal World.}
 Our ideal functionality \F interacts with publishers, subscribers, \broker, and
 \garbler as follows:
 
-\begin{itemize}[leftmargin=20pt,itemsep=4pt,topsep=4pt]
+\begin{itemize}[leftmargin=*,itemsep=4pt,topsep=4pt]
 		\item Each publisher sends a \policy to \F and each subscriber sends a
 			subscription message to \F containing subscribed computation $C$. Let $S_C$
 			be the set of $C$'s subscribers. 
@@ -48,28 +53,30 @@ Our ideal functionality \F interacts with publishers, subscribers, \broker, and
 		\item \broker sends \F a subset $P_C \subset P'$ of publishers whose
 			policies allow $C$.
 			
-		\item If data $x_C$ of all publishers in $P_C$ is enough to compute $C$, \F
-			sends $C(\vec{x_C}) \xor r$ and $r$ to all subscribers in $S_C$,
-			otherwise \F sends empty message $\bot$ to all subscribers in $S_C$. 
+		\item If data $\vec{x}_C$ of all publishers in $P_C$ is enough to compute
+			$C$, \F sends $C(\vec{x}_C) \xor r$ and $r$ to all subscribers in $S_C$,
+			otherwise \F sends empty message $\bot$ to all subscribers in $S_C$.
 
 \end{itemize}
-
+\vspace{6pt}
 \noindent\textbf{Real World.} In real world, \F is replaced by our
-protocol described in Figure~\ref{fig:basicprotocol}.
+protocol described in Figure~\ref{fig:basicprotocol}.\\
 
-\begin{mdframed}[style=myframe]
+\begin{mdframed}[style=mydefframe]
 
-\begin{definition}
+\begin{define}
 	\label{def:security}
-	\textit{	
-	A pub/pro/sub protocol is simulation secure if for every \Adv in the real
-	world who maliciously corrupts a subset of publishers and a subset of
-	subscribers, and only passively corrupts \broker and \garbler, with arbitrary
-	collusion between malicious publishers, malicious subscribers, and
-	hones-but-curious \broker and \emph{no} collusion between \broker and
-	\garbler, there exists a simulator \Sim in the ideal world, who also corrupt
-	the same set of parties and produces an output identically distributed to
-	\Adv's output in the real world.}
-\end{definition}
+
+	\textit{	A publish-process-subscribe protocol is simulation secure if for
+	every adversary \Adv in the real world that maliciously corrupts a subset of
+	publishers and a subset of subscribers, and only passively corrupts \broker
+	and \garbler, with arbitrary collusion between malicious publishers,
+	malicious subscribers, and hones-but-curious \broker and \emph{no} collusion
+	between \broker and \garbler, there exists a simulator \Sim in the ideal
+	world that also corrupts the same set of parties and produces an output
+	identically distributed to \Adv's output in the real world.  
+	}
+
+\end{define}
 
 \end{mdframed}
