@@ -3,27 +3,27 @@
 
 Our protocol implementation works on top of the IoT \MQTT{} protocol, which
 allows exchanging messages in a publisher-subscriber model arbitrated by a
-broker.  In order to set up the ratchet keys, both Subscribers and Publishers
-need a private communication channel with the Third Party.  In order to embed
+\broker.  In order to set up the ratchet keys, both Subscribers and Publishers
+need a private communication channel with the \garbler.  In order to embed
 this communication into the MQTT protocol each client (either Publisher or
 Subscriber) will have a device-specific topic that will allow two-way
-authenticated communication between each client and the Broker.  The Broker
-will forward the messages from this channel to the Third Party so that clients
-can establish a ratchet key with the Third Party.  This design choice helps us
+authenticated communication between each client and the \broker.  The \broker
+will forward the messages from this channel to the \garbler so that clients
+can establish a ratchet key with the \garbler.  This design choice helps us
 maintain the \MQTT{} semantics on the clients, since they only exchange
-messages with a single Broker at the \MQTT{} level.
+messages with a single \broker at the \MQTT{} level.
 
 Although \MQTT{} can be used on top of TLS to provide secrecy, authenticity and
-forward-secrecy; when clients obtain the ratchet keys from the Third Party
-the communication is forwarded by the Broker at the application layer, so we
+forward-secrecy; when clients obtain the ratchet keys from the \garbler
+the communication is forwarded by the \broker at the application layer, so we
 need to protect it to maintain secrecy, authenticity and forward-secrecy
-against the Broker.  For this reason we choose to add authentication in the
+against the \broker.  For this reason we choose to add authentication in the
 \MQTT{} messages by means of public key signature and we use a key exchange
-protocol to share secrets between Clients and the Third Party.  In the case of
+protocol to share secrets between Clients and the \garbler.  In the case of
 Publishers, this authenticated key exchange is used to derive the Publisher'
 ratchet key.  In the case of Subscribers, for every function subscription, a
 key exchange is performed to derive a key to encrypt the function ratchet key
-sent from the Third Party to the Subscriber.
+sent from the \garbler to the Subscriber.
 
 The use of shared ratchet keys between Publishers and the \garbler, and between
 the Subscribers and the \garbler allows us to maintain forward secrecy at the
@@ -36,17 +36,17 @@ the using the preimage-resistance of a cryptographic hash function).  At any
 round, a seed can be derived from a ratchet key to be used to generate
 pseudorandom byte strings.  The idea of using ratchet keys to achieve forward
 secrecy has been popularized by the Signal messaging protocol (already analyzed
-by the security research community TODO: add 2 cites), from which we take
+by the security research community~\cite{signal1}~\cite{signal2}), from which we take
 inspiration.
 
 This design achieves the desired cryptographic properties of TLS for selected
-parts of the messages underlying the \MQTT{} communication, allowing the Broker
+parts of the messages underlying the \MQTT{} communication, allowing the \broker
 to be aware of the operation without being able to reveal or tamper with any
 ratchet key.
 
 During the Publisher setup phase, not only its ratchet key will be established
-but also the Broker will register a special publishing topic that the Publisher
-will use to submit its encrypted values.  Every time the Broker evaluates a
+but also the \broker will register a special publishing topic that the Publisher
+will use to submit its encrypted values.  Every time the \broker evaluates a
 garbled circuit using Publishers encrypted values as inputs, it will publish
 the masked result to the relevant function topic so that the interested
 Subscribers can receive it after having subscribed to that function topic.
@@ -60,21 +60,22 @@ The block cipher behind the garbled circuit in our implementation is AES-128
 (both blocks and keys are 128 bits).  In particular, the block size has a
 direct relation to the size of the garbled circuit (as every non-XOR gate
 requires a fixed number of cipher blocks) as well as the required bandwidth
-between Publishers and the Broker, and between Subscribers and the Broker.  In
+between Publishers and the \broker, and between Subscribers and the \broker.  In
 particular, for every secret bit transferred from or to a client (which will
 either be an input bit or an output bit of the garbled circuit) will be
 expanded to 128 bits.
 
 \subsection{Extending \libgarble.}
 
-\libgarble{} is a garbling library written in C based on \emph{JustGarble} that
-is in current development.  It extends \emph{JustGarble} by adding two
-different size optimizations in the garbled circuit: Half-gates (which combines
-the free-XOR optimization with AND gates that only require two ciphertexts) and
-Privacy-free garbling (which achieves the free-XOR optimization with AND gates
-that only require one ciphertext at the cost of losing privacy and only
-guaranteeing authenticity).  Apart from restructuring the code to make it more
-concise, it also offers a better API than \emph{JustGarble} to build circuits.
+\libgarble{}~\cite{libgarble} is a garbling library written in C based on
+\emph{JustGarble}~\cite{justgarble} that is in current development.  It extends
+\emph{JustGarble} by adding two different size optimizations in the garbled
+circuit: Half-gates (which combines the free-XOR optimization with AND gates
+that only require two ciphertexts) and Privacy-free garbling (which achieves
+the free-XOR optimization with AND gates that only require one ciphertext at
+the cost of losing privacy and only guaranteeing authenticity).  Apart from
+restructuring the code to make it more concise, it also offers a better API
+than \emph{JustGarble} to build circuits.
 
 Nevertheless, \libgarble{} being in current development lacks some
 functionality which we had to add in order to build circuits and garble them
@@ -129,14 +130,13 @@ blocks very concisely.
 The interpreter is written in golang in just 470 lines of code.
 
 Other solutions to express garbled circuits in higher level languages than the
-underlying gates themselves have been proposed: namely \OblivC{}.  \OblivC{}
-allows the developer to embed the secure computation part of a protocol in C
-code with a GCC wrapper that takes care of the compilation, the circuit
-building and the integration in a distributed program.  We don't require this
-embedding in our protocol because the secure function is directly described
-independently.
+underlying gates themselves have been proposed: namely \OblivC{}~\cite{oblivc}.
+\OblivC{} allows the developer to embed the secure computation part of a
+protocol in C code with a GCC wrapper that takes care of the compilation, the
+circuit building and the integration in a distributed program.  We don't
+require this embedding in our protocol because the secure function is directly
+described independently.
 
-% TODO: Add Obliv-C reference
 \noindent
 \begin{minipage}{\linewidth}
 \lstinputlisting[
@@ -167,9 +167,9 @@ Four our implementation we decided to use the same representation for all
 numerical values: two's complement fixed point 32 bit numbers, with 26 bits for
 the integer part and 8 bits for the decimal part.
 
-\subsection{Broker and Third Party.}
+\subsection{\broker and \garbler.}
 
-The Broker and the Third Party have been written in the Go programming
+The \broker and the \garbler have been written in the Go programming
 language.  The choice of go was motivated on one hand due to the provided
 built-in concurrency facilities such as \emph{goroutines} (light-weight
 threads) and \emph{channels} (a primitive to send messages between
@@ -178,30 +178,30 @@ of both entities.  On the other hand, this language offers the good performance
 of a compiled language with the benefits of memory safety (which is very
 welcomed when dealing with dynamic data structures).
 
-The communication between the Broker and Third Party (to request the garbling
+The communication between the \broker and \garbler (to request the garbling
 of a circuit for Publishers inputs at some particular rounds) happens over a
 TCP RPC synchronously.
 
-Implementation wise, the Broker requires a regular \MQTT{} Broker server
-{reference: https://github.com/jeffallen/mqtt} with the minor modification that
-any received message whose topic starts with a name space reserved for our
+The \broker requires a regular \MQTT{} \broker server which we take from an
+open source implementation~\cite{mqttgo}.  We have modified it so that any
+received message whose topic starts with a name space reserved for our
 protocol, will be handled according to the protocol description instead of
 being forwarded to the subscribers of that topic.
 
-The Broker and Third Party are required to maintain replicated data structures
+The \broker and \garbler are required to maintain replicated data structures
 to store information of every Publisher, Subscriber and function.  Our design
 makes this requirement easy because all setup messages between clients and
-Third Party are forwarded by the Broker, allowing the later one to register the
+\garbler are forwarded by the \broker, allowing the later one to register the
 non-secret details of the setup.
 
-The Third Party is in charge of maintaining Publishers ratchet keys in sync
+The \garbler is in charge of maintaining Publishers ratchet keys in sync
 with Publishers, and Function ratchet keys in sync with Subscribers interested
-in that function.  The Third Party also garbles circuits on demand for the
-Broker.
+in that function.  The \garbler also garbles circuits on demand for the
+\broker.
 
-The Broker is in charge of storing Publishers encrypted values with their
+The \broker is in charge of storing Publishers encrypted values with their
 corresponding publisher ratchet key round, and of requesting the garbling of
-circuits to the Third Party (for those particular Publishers values rounds) to
+circuits to the \garbler (for those particular Publishers values rounds) to
 evaluate the garbled circuit and send the result to the subscribed Subscribers.
 
 \subsection{Publisher and Subscriber.}
@@ -209,19 +209,18 @@ evaluate the garbled circuit and send the result to the subscribed Subscribers.
 The Publisher has been written in C in order to minimize its memory footprint
 as well as its resource consumption, considering that the code may be running
 in a resource-constraint IoT device.  For the \MQTT{} part of the Publisher we
-have used the Eclipse Paho client library {reference:
-https://www.eclipse.org/paho/clients/c/}.
+have used the Eclipse Paho client library~\cite{paho}.
 
 On the other hand, the Subscriber has been written in golang, assuming that it
 will be running on a more powerful device.  The \MQTT{} library used by the
-Subscriber is the same we used in the Broker, which also provides client
-functionality {reference: https://github.com/jeffallen/mqtt}.
+Subscriber is the same we used in the \broker\~cite{mqttgo}, which also provides
+client functionality.
 
 Publishers and Subscribers follow a state machine to initialize themselves
 (i.e.\ for Publishers to obtain a Publisher ratchet key, for Subscribers to
 obtain the Function ratchet key of all desired functions).  The initialization
 to establish the ratchet keys happens through a message exchange with the
-Broker and Third Party via \MQTT{} messages published and received at a unique
+\broker and \garbler via \MQTT{} messages published and received at a unique
 per-device specific topic.  The device specific topic is formed using the
 Client's (Subscriber or Publisher) public key.
 
@@ -231,12 +230,12 @@ The free XOR optimization in garbled circuits require that for every wire, the
 XOR of the label for bit 0 and bit 1 be a unique secret constant \emph{delta}
 value.  Since input values are generated by independent Publishers using their
 own seed, it's not easy to achieve this pattern without adding complexity to
-the system.  For this reason, the Third Party will generate one \emph{identity}
+the system.  For this reason, the \garbler will generate one \emph{identity}
 gate per input wire that will allow transforming the inputs sent by Publishers
 to garbled circuit inputs that follow the \emph{delta} pattern.
 
 The implementation of these identity gates has been written in Go and is
-integrated in the Broker and Third Party.  Because it's not written in C, like
+integrated in the \broker and \garbler.  Because it's not written in C, like
 the rest of the circuit garbling and garbled circuit evaluation, we consider
 this step not to be optimized for speed.  Nevertheless, its computation
 overhead should be small and linear in the number of the circuit function
@@ -247,12 +246,11 @@ inputs.
 \subsection{Cryptographic choices}
 
 For all the cryptographic operations we have used the \emph{libsodium} C
-library {reference: https://download.libsodium.org/doc/} which is a fork of
-NaCl {reference: http://nacl.cr.yp.to/}.  A particular feature of this library
-is that it offers basic cryptographic primitives with secure design choices
-for the underlying construction, algorithms and parameters.  This provides a
-high level of usability and removes the possibility of some error-prone
-choices.
+library~\cite{libsodium} which is a fork of NaCl~\cite{nacl}.  A particular
+feature of this library is that it offers basic cryptographic primitives with
+secure design choices for the underlying construction, algorithms and
+parameters.  This provides a high level of usability and removes the
+possibility of some error-prone choices.
 
 In particular, the library makes the following choices for the primitives we use.
 
