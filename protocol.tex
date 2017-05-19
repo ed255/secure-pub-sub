@@ -1,14 +1,21 @@
 \section{Protocol}
 \label{sec:protocol}
 
+We describe our protocol. We describe system in Section~\ref{def:system}, and
+we solve many issues that come into building a system.
+
 \improvement{Malicious \broker doesn't affect privacy, online correctness}
 
-
+\subsection{Basic Protocol}
 \input{basic_protocol}
 
-\input{seed_extension_protocol}
+\subsection{Security Proof}
+\input{simulator}
 
-\noindent\textbf{Efficient Wire Labels Consistency Check.} In our basic
+\subsection{Reduced Communication Extension}
+\input{extended_protocol}
+
+\subsection{Efficient Wire Labels Consistency Check} In our basic
 protocol, described in Figure~\ref{fig:basicprotocol}, we execute a new
 instance of private set intersection \emph{cardinality} protocol for every
 input bit of the circuit, which is expensive.  We present a more efficient wire
@@ -45,5 +52,3 @@ problem.}
 with \garbler as a separate tntity and then later explain how it can be
 eliminated by transfering it's functionality to subscribers. Similary, we can
 transfer some functionality to publishers. Which one of them is better?}
-
-\input{proof}
