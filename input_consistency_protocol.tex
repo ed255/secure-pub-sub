@@ -1,0 +1,47 @@
+\begin{figure}[h]
+\begin{mdframed}[style=myframe]
+
+\begin{itemize}[leftmargin=*,itemsep=4pt]
+
+	\item \broker and \garbler share an ephemeral seed $s''$ for wire label
+		consistency check before every computation $C$.
+
+	\item \broker generates a pseudorandom mask $r_b$, using seed $s''$, and
+		computes $w_b \xor r_b$. We call the set of these masked input labels
+		$R_\broker$. 
+
+	\item \garbler generates the same pseudorandom mask $r_b$, using seed
+		$s''$, and computes $w_0 \xor r_b$ and $w_1 \xor r_b$. We call the set of
+		these masked labels $R_\garbler$.
+
+	\item \broker and \garbler runs private set intersection (PSI) protocol with
+		$R_\broker$ and $R_\garbler$ as inputs and only \broker receives the
+		intersection.
+		
+	\item	If cardinality of $R_\broker \cap R_\garbler$ is $|R_\broker| =
+		|R_\garbler / 2|$, then all wire labels are consistent. 
+
+		\item If cardinality of $R_\broker \cap R_\garbler$ is less than
+			$|R_\broker| = |R_\garbler / 2|$, then $|R_\broker| - |R_\broker \cap
+			R_\garbler|$ labels are inconsistent. In this case:
+
+			\begin{itemize}[leftmargin=*,itemsep=4pt,topsep=4pt]
+
+					\item \broker unmasks all masked labels in $R_\broker \cap
+						R_\garbler$ to learn $W_\broker \cap W_\garbler$.
+
+					\item \broker sends all inconsistent labels $W_\broker \setminus
+						(W_\broker \cap W_\garbler)$ to \garbler. 
+						
+					\item \garbler hard-wires in the garbled circuit $GC$ nullifying
+						values for inputs of all publishers with at least $1$ inconsistent
+						label.
+						
+			\end{itemize}
+			
+\end{itemize}
+
+\end{mdframed}
+\caption{Efficient Wire Label Consistency Protocol}
+\label{fig:econsistency}
+\end{figure}

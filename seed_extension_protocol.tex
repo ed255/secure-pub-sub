@@ -1,0 +1,74 @@
+\begin{figure}[h]
+\begin{mdframed}[style=myframe]
+
+\initialize
+\begin{itemize}[leftmargin=*,itemsep=4pt,topsep=4pt]
+ 
+	\item Each new publisher generates and sends to \garbler a truly random seed
+		$s$. This seed will be used to create wire labels without interaction.
+
+\end{itemize}
+
+\subscribe
+\begin{itemize}[leftmargin=*,itemsep=4pt,topsep=4pt]
+
+	\item In addition to registering subscription with \broker, subscribers for a
+		computation $C$ also register with \garbler. \garbler sends a truly
+		random seed $s'$ for computation $C$ and send it to every subscriber who
+		subscribes for $C$; generating a new seed for the first subscription for
+		computation $C$.
+		
+\end{itemize}
+
+\publish
+\begin{itemize}[leftmargin=*,itemsep=4pt,topsep=4pt]
+		
+	\item To publish $k$th value, publisher generates two pseudorandom wire
+		labels, $w_0$ and $w_1$, using seed $s$, for each bit of the value.  $w_0$
+		is $i$th and $w_1$ is $(i+1)$th numbers in pseudorandom sequence generated
+		using seed $s$; $2kL \leq i < 2(k+1)L$, $L$ being the bit-length of a
+		value.
+
+	\item For each input bit $b$, publisher sends only wire label $w_b$ to
+		\broker.
+
+\end{itemize}
+
+\process
+\begin{itemize}[leftmargin=*,itemsep=4pt,topsep=4pt]
+
+	\item \garbler independently generates input wire labels using seed $s$ from
+		each publisher contributing input and an output mask $r$ using seed $s'$
+		for the output.
+
+\end{itemize}
+
+\vspace{8pt}
+
+\textbf{Forward Secure Seeds}
+\vspace{4pt}
+
+Following procedure ensures that seeds $s$ and $s'$ used above are forward
+	secure, i.e., compromise of seed does not affect the confidentiality of past
+	data. We use Signal, a popular secure messaging protocol, key ratcheting
+	protocol for forward security.
+
+\begin{itemize}[leftmargin=*]
+
+	\item Generate a truly random key $K_0$.
+
+	\item Generate, using pseudorandom function (PRF) with key $K_0$, a
+		pseudorandom seed $s_0$ and a pseudorandom key for the ratchet round $1$.
+		Seed $s_0$ is used to generate pseudorandom strings during ratchet round
+		$0$.
+
+	\item At round $i$, using PRF with key $K_i$, generate a pseudorandom seed
+		$s_i$ and key for ratchet round $i+1$. Seed $s_i$ is used to generate
+		pseudorandom strings during ratchet round $i$.
+
+\end{itemize}
+
+\end{mdframed}
+\caption{Reduced Communication Extension with Forward Security}
+\label{fig:basicprotocol}
+\end{figure}

@@ -1,0 +1,77 @@
+\begin{figure*}[h]
+\begin{mdframed}[style=myframe]
+
+\initialize
+\begin{itemize}[leftmargin=18pt,itemsep=4pt,topsep=4pt]
+ 
+	\item Each new publisher sends \broker a \policy specifying allowed
+		computations on its data.
+
+\end{itemize}
+
+\subscribe
+\begin{itemize}[leftmargin=18pt,itemsep=4pt,topsep=4pt]
+
+	\item To subscribe computation $C$, subscriber sends a subscription request
+		containing $C$ to \broker. If \broker allows subscriber to learn $C$'s
+		output, it adds the subscriber to a list of $C$'s subscribers. 
+
+\end{itemize}
+
+\publish
+\begin{itemize}[leftmargin=18pt,itemsep=4pt,topsep=4pt,after=]
+		
+	\item To publish $k$th value, publisher generates two pseudorandom wire
+		labels, $w_0$ and $w_1$, for each bit of the value. 
+		
+	\item For each input bit $b$, publisher sends only $w_b$ to \broker and sends
+		both $w_0$ and $w_1$ to \garbler.
+
+\end{itemize}
+
+\process
+\begin{itemize}[leftmargin=18pt,itemsep=4pt,topsep=4pt]
+
+	\item \broker waits for a specified time period $t$ to receive input wire
+		labels, a single label $w_b$ for a bit $b$, from a subset of publishers
+		$P_C$ whose policies allow $C$. After time period $t$, \broker sends
+		\garbler identifiers of publishers in $P_C$ along with identifiers of
+		publishers whose data wasn't received during time period $t$ and requests
+		\garbler to garble circuit for $XOR \circ C$. $XOR$ is used to mask the
+		output of the circuit.
+
+	\item \broker sends \garbler the set of $C$'s subscribers $S_C$.
+		
+	\item \garbler generates a garbled circuit $GC$ for the circuit $XOR \circ C$
+		using both wire labels for each input bit, $w_0$ and $w_1$ for a bit $b$,
+		received from publishers in set $P_C$ hard-wiring nullifying value for
+		publishers whose input labels weren't received by \broker as well as any
+		publishers whose labels weren't received by \garbler. \garbler generates a
+		random mask $r$ and use it to mask the output $o$ of $C$, such that
+		evaluating $GC$ would result in a masked output $o+r$.
+		
+	\item \garbler sends $r$ to all subscribers in the set $S_C$ and $GC$ to
+		\broker along with identifiers for publishers for which it hard-wired
+		nullifying values.
+
+	\item For every bit $b$ of the $C$ inputs, \garbler and \broker run a private
+		set intersection \emph{cardinality} (PSI-C) protocol to determine wire
+		labels consistency, i.e., if \broker input label for bit $b$, $w_b$, is one
+		of the two \garbler labels for bit $b$, $w_0$ and $w_1$. If PSI-C outputs
+		$1$, then the labels are consistent and if it's $0$ then the labels are
+		inconsistent. \garbler will use nullifying values for inputs of all
+		publishers with at least $1$ inconsistent wire label. 
+		
+	\item \broker evaluates the garbled circuit using wire labels sent by
+		publishers in set $P_C$ ignoring labels for which \garbler hard-wired
+		nullifying values, obtains masked output $o \xor r$, and sends $o \xor r$
+		to all subscribers of computation $C$.
+  
+	\item Subscribers in the set $S_C$ use mask $r$ to unmask the output $o$.
+
+\end{itemize}
+
+\end{mdframed}
+\caption{Basic Protocol}
+\label{fig:basicprotocol}
+\end{figure*}
