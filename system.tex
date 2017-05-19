@@ -41,8 +41,8 @@ inspiration.
 
 This design achieves the desired cryptographic properties of TLS for selected
 parts of the messages underlying the \MQTT{} communication, allowing the Broker
-to be aware of the operation without being able to reveal or tamper any ratchet
-key.
+to be aware of the operation without being able to reveal or tamper with any
+ratchet key.
 
 During the Publisher setup phase, not only its ratchet key will be established
 but also the Broker will register a special publishing topic that the Publisher
@@ -211,7 +211,6 @@ as well as its resource consumption, considering that the code may be running
 in a resource-constraint IoT device.  For the \MQTT{} part of the Publisher we
 have used the Eclipse Paho client library {reference:
 https://www.eclipse.org/paho/clients/c/}.
-
 
 On the other hand, the Subscriber has been written in golang, assuming that it
 will be running on a more powerful device.  The \MQTT{} library used by the
