@@ -25,6 +25,8 @@ ratchet key.  In the case of Subscribers, for every function subscription, a
 key exchange is performed to derive a key to encrypt the function ratchet key
 sent from the Third Party to the Subscriber.
 
+% TODO: Explain ratchet key.
+
 This design achieves the desired cryptographic properties of TLS for selected
 parts of the messages underlying the \MQTT{} communication, allowing the Broker
 to be aware of the operation without being able to reveal or tamper any ratchet
@@ -117,9 +119,9 @@ embedding in our protocol because the secure function is directly described
 independently.
 
 % TODO: Add Obliv-C reference
-
+\noindent
 \begin{minipage}{\linewidth}
-\lstinputlisting[style=Scheme, frame=single,
+\lstinputlisting[
 caption={Definition of the \emph{fold} high order function with an example of
 its usage with \emph{min2} to define a new function.}]
 {listings/prelude.lsp}
@@ -132,8 +134,9 @@ signed integers and returns the smaller one.
 \texttt{l} combining its elements with a function \texttt{f} to build up a
 return value.
 
+\noindent
 \begin{minipage}{\linewidth}
-\lstinputlisting[style=Scheme, frame=single,
+\lstinputlisting[
 caption={Example of a function over Publishers' values.}]
 {listings/min-example.lsp}
 \end{minipage}

@@ -3,6 +3,7 @@
 \usepackage{float}
 \usepackage{graphicx}
 \usepackage{subcaption}
+\usepackage{amsmath}
 
 % https://github.com/stuhlmueller/scheme-listings
 \lstdefinestyle{Scheme}{
@@ -30,6 +31,14 @@
   breaklines=true,
   breakatwhitespace=true,
   literate=*{`}{{`}}{1}
+}
+
+\lstset{
+  style=Scheme,
+  frame=single,
+  xleftmargin=0.1cm,
+  xrightmargin=0.1cm,
+  captionpos=b
 }
 % variables
 

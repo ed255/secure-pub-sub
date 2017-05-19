@@ -3,6 +3,10 @@
 
 \subsection{Setup}
 
+% Add linux version
+
+% Add count of AND gates.
+
 We have evaluated our implementation in an environment consisting on two
 computers located in the same Gigabit Ethernet network.  We run the Broker,
 Third Party and one Subscriber on the first computer, and all the Publishers in
@@ -63,13 +67,13 @@ variable number of Publishers.
 
 
 \begin{figure}
-  \includegraphics[width=0.45\textwidth]{plots/nonxor_gates_log.png}
+  \includegraphics[width=0.38\textwidth]{plots/nonxor_gates_log.png}
   \caption{Non-XOR gates count per function used in the microbenchmarks.}
   \label{micro-nonxor}
 \end{figure}
 
 \begin{figure}
-  \includegraphics[width=0.45\textwidth]{plots/enc_dec.png}
+  \includegraphics[width=0.38\textwidth]{plots/enc_dec.png}
   \caption{Time spent garbling and evaluating the identity input gates.
     Results obtained from the mean of all microbenchmark functions with 5
     repetitions each, with the confidence interval of 95\% shown in gray.}
@@ -89,7 +93,7 @@ variable number of Publishers.
 %\end{figure}
 
 \begin{figure}
-  \includegraphics[width=0.45\textwidth]{plots/size_log.png}
+  \includegraphics[width=0.38\textwidth]{plots/size_log.png}
   \caption{Size of the garbled circuit and the associated date required by the
     Broker to evaluate it.}
   \label{micro-sizes}
@@ -175,7 +179,7 @@ with the given number of samples in a batch.
 % sending N-1 values per epoch each one.
 
 \begin{figure}
-  \includegraphics[width=0.45\textwidth]{plots/turonet.png}
+  \includegraphics[width=0.38\textwidth]{plots/turonet.png}
   \caption{TODO turonet.  Results obtained from the mean of 5 repetitions for
     each configuration, with the confidence interval of 95\% shown in gray.}
   \label{turonet-times}
@@ -217,7 +221,7 @@ computing the square root in the function circuit, which would be an expensive
 operation.
 
 \begin{figure}
-  \includegraphics[width=0.45\textwidth]{plots/stream.png}
+  \includegraphics[width=0.38\textwidth]{plots/stream.png}
   \caption{Mean time required for garbling, evaluating and sending the garbled
     circuit to the Broker for computing the correlation and linear regression
     of data streams.  Garbling and evaluating includes the time to garble and
@@ -252,7 +256,7 @@ happens once per day.
 % Time garble and time eval includes the time spend encrypting and decrypting
 % the input values.
 
-\begin{figure}
+\begin{table}
     \begin{tabular}{l*{3}{r}r}
     \textbf{Statistic}  & \textbf{Garble} & \textbf{Send} & \textbf{Evaluate} & \textbf{Size} \\
     \hline
@@ -268,7 +272,7 @@ happens once per day.
       input identity.  Results obtained from the mean of 5 repetitions for each
       configuration, with the confidence interval of 95\% shown in gray.}
     \label{stats-times}
-\end{figure}
+\end{table}
 
 % TODO: 3. Road Volume sensor traffic, evaluation of the expected time to follow a path
 %\paragraph{Estimation of time required to follow a path with traffic}
