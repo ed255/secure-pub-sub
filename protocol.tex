@@ -1,9 +1,10 @@
 \section{Protocol}
 \label{sec:protocol}
 
+\improvement{Maliciosu \broker doesn't affect privacy, online correctness}
+
+
 \begin{figure}[h]
-	\caption{Basic Protocol}
-\label{fig:basicprotocol}
 \begin{mdframed}[style=myframe]
 
 %\begin{itemize}[leftmargin=*, itemsep=6pt]
@@ -11,10 +12,9 @@
 \initialize
 \begin{itemize}[leftmargin=*]
  
-	\item Each new publisher sends \broker a policy specifying allowed
+	\item Each new publisher sends \broker a \policy specifying allowed
 		computations on its data.
-%		and generates a truly random seed $s$ and send
-%		it to \garbler.
+%		and generates a truly random seed $s$ and send it to \garbler.
 
 %	\item All publishers and subscribers establish an authenticated encrypted
 %		channel with \broker and through \broker with \garbler.
@@ -25,12 +25,14 @@
 \begin{itemize}[leftmargin=*]
 
 	\item To subscribe computation $C$, subscriber sends a subscription request
-		containing $C$ to \broker and requests an output mask $r$ for computation
-		$C$ from \garbler.
+		containing $C$ to \broker. If \broker allows subscriber to learn $C$'s
+		output, it adds the subscriber to a list of $C$'s subscribers. 
 
-	\item \garbler sends subscriber a pseudorandom mask $r$ for computation $C$;
-		generating a new mask if this is the first subscription for computation
-		$C$.
+		%and requests an output mask $r$ for computation $C$ from \garbler.
+
+%	\item \garbler sends subscriber a pseudorandom mask $r$ for computation $C$;
+%		generating a new mask if this is the first subscription for computation
+%		$C$.
 
 \end{itemize}
 
@@ -45,25 +47,49 @@
 
 \end{itemize}
 
-\compute
+\process
 \begin{itemize}[leftmargin=*]
 
-	\item Once \broker has wire labels for all publishers' inputs required for
-		computation $C$, it requests \garbler to garble a circuit for $C$.  
-  
-	\item \garbler generates garbled circuit for $M \circ C$, composition of
-		masking function $M:XOR$ and computation $C$ with a hardwired pseudorandom
-		mask $r$ and sends garbled circuit to \broker.
+	\item \broker waits for a specified time period $t$ to receive input wire
+		labels, a single label $w_b$ for a bit $b$, from a subset of publishers
+		$P_C$ whose policies allow $C$. After time period $t$, \broker sends
+		\garbler identifiers of publishers in $P_C$ along with identifiers of
+		publishers whose data wasn't received during time period $t$ and requests
+		\garbler to garble circuit for $XOR \circ C$. $XOR$ is used to mask the
+		output of the circuit.
+
+	\item \broker sends \garbler the set of $C$'s subscribers $S_C$.
+		
+	\item \garbler generates a garbled circuit $GC$ for the circuit $XOR \circ C$
+		using both wire labels for each input bit, $w_0$ and $w_1$ for a bit $b$,
+		received from publishers in set $P_C$ hard-wiring nullifying value for
+		publishers whose input labels weren't received by \broker as well as any
+		publishers whose labels weren't received by \garbler. \garbler generates a
+		random mask $r$ and use it to mask the output $o$ of $C$, such that
+		evaluating $GC$ would result in a masked output $o+r$.
+		
+	\item \garbler sends $r$ to all subscribers in the set $S_C$ and $GC$ to
+		\broker along with identifiers for publishers for which it hard-wired
+		nullifying values. 
+		
+%		\garbler checks if it has received wire labels, $w_0$ and $w_1$ for a bit
+		%		$b$, from all publishers in $P_C$. If so, it generates garbled circuit,
+		%		$GC$ for $XOR \circ C$, composition of $XOR$ masking function and $C$
+		%		and sends garbled circuit to \broker. $XOR$ adds a pseudorandom mask
+		%		$r$ to the output of $C$.
 
 	\item \broker evaluates the garbled circuit using wire labels sent by
-		publishers, obtains masked output $o \xor r$, and sends $o \xor r$ to all
-		subscribers of computation $C$.
+		publishers in set $P_C$ ignoring labels for which \garbler hard-wired
+		nullifying values, obtains masked output $o \xor r$, and sends $o \xor r$
+		to all subscribers of computation $C$.
   
-	\item Subscribers use mask $r$ to unmask the output $o$.
+	\item Subscribers in the set $S_C$ use mask $r$ to unmask the output $o$.
 
 \end{itemize}
 
 \end{mdframed}
+\caption{Basic Protocol}
+\label{fig:basicprotocol}
 \end{figure}
 
 \subsection{Basic Protocol}
@@ -114,7 +140,7 @@
 
 \end{itemize}
 
-\compute
+\process
 \begin{itemize}[leftmargin=*]
 
 	\item Once \broker has wire labels for all publishers' inputs required for
