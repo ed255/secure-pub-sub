@@ -61,22 +61,31 @@ variable number of Publishers.
     \label{fig:micro-times}
 \end{figure*}
 
-\begin{table}
-    \begin{tabular}{l|*{4}{c}c}
-      & \textbf{Sum} & \textbf{Mult} & \textbf{Mean} & \textbf{Var} & \textbf{Min/Max} \\
-    \hline
-    \textbf{Reduction} & 06.63 \% & 09.76 \% & 06.87 \% & 09.68 \% & 14.47 \% \\
-    \end{tabular}
-    \caption{Number of gates reduction for each microbenchmark function we
-      would obtain by using the half-gates optimization.}
-    \label{stats-times}
-\end{table}
+In figure~\ref{fig:micro-times} we show the timing results for the most
+relevant steps of the secure computation happening between the \broker and the
+\garbler of the 5 numerical operations for varying number of Publishers from 10
+to 1000.  In particular, since we are encoding the Publishers values with 32
+bits, the number of input wires will be the number of Publishers times 32.  We
+would expect the evaluated functions to scale linearly in the three analyzed
+steps of the protocol.  Whereas the \emph{multiplication} shows the more clear
+linear scaling, other operations show a transitive state tending to linear,
+with the most extreme case happening on the \emph{mean}.  We attribute this
+later result to the fixed cost of the final division in the mean, which becomes
+the dominant overhead of the circuit until the number of Pulbishers start
+reaching the 1000.  On the other hand, the \emph{summation} is the most
+lightweight function, and doesn't show yet a stabilizing linear trend for the
+number of Publishers used in the experiment.  Accompanying the garble
+(figure~\ref{fig:micro-garble-time}) and the evaluate
+(figure~\ref{fig:micro-eval-time}) we show the time it took to garble and
+evaluate the input identity gates.
 
-\begin{figure}
-  \includegraphics[width=0.38\textwidth]{plots/nonxor_gates_log.png}
-  \caption{Non-XOR gates count per function used in the microbenchmarks.}
-  \label{micro-nonxor}
-\end{figure}
+We can see that the time on the identity gates (encrypting and decrypting the
+inputs) makes a significant influence in the faster functions, being comparable
+in magnitude to the evaluation and garbling time of the \emph{summation}
+(the input decryption time is even higher than the garbled circuit evaluation
+time for \emph{summation}).  We attribute this behavior to the fact that this
+part of the protocol is implemented in go instead of C like the garbling and
+evaluation.
 
 \begin{figure}
   \includegraphics[width=0.38\textwidth]{plots/enc_dec.png}
@@ -86,6 +95,24 @@ variable number of Publishers.
   \label{micro-inputs}
 \end{figure}
 
+We can see in more detail a comparison of the time spent on garbling and
+evaluating the identity gates in figure~\ref{micro-inputs}.  We expected the
+garbling to be roughly twice the times of evaluating (garbling involves
+encrypting two labels whereas evaluating involves decrypting one)
+
+\begin{figure}
+  \includegraphics[width=0.38\textwidth]{plots/nonxor_gates_log.png}
+  \caption{Non-XOR gates count per function used in the microbenchmarks.}
+  \label{micro-nonxor}
+\end{figure}
+
+In figure~\ref{micro-nonxor} we show the number of non-XOR gates (that is, the gates that
+incur a garbling and evaluating and that increase the size of the garbled
+circuit) for every function.  We can clearly see the relation between the
+number of the non-XOR gates and the cost of computing every function by
+comparing shape of the plot with timing results shown in
+figure~\ref{fig:micro-times}.
+
 \begin{figure}
   \includegraphics[width=0.38\textwidth]{plots/size_log.png}
   \caption{Size of the garbled circuit and the associated date required by the
@@ -93,15 +120,44 @@ variable number of Publishers.
   \label{micro-sizes}
 \end{figure}
 
-We can see that the time spent encrypting and decrypting the inputs (that is,
-garbling and evaluating the input identity gates) makes a significant influence
-in the mean, min/max and sum microbenchmark, being comparable in magnitude to
-the evaluation and garbling time (notice that for sum, the input
-encryption/decryption time is even higher than the garbling/evaluation time).
-We attribute this behavior to the fact that this part of the protocol is
-implemented in go instead of C like the garbling and evaluation.
+In figure~\ref{micro-sizes} we see the transfer size between the \broker and
+the \garbler for every function (that is, the size of the garbled circuit and
+the associated data structures like the masking round used).  As expected, the
+shape is very similar to the number of non-XOR gates for function shown in
+figure~\ref{micro-nonxor}.  In the figure we can observe where the bottleneck
+of using garbled circuits come from: the need to transfer such amount of data
+over the network.  This fact makes the choice of network bandwidth between the
+\broker and the \garbler critical, leading to very different results in
+performance (which is dominated by the sending time) depending on the choice.
+This figure also helps us understand the limits of using garbled circuits: the
+\emph{variance} and \emph{multiplication} garbled circuits for 1000 Publishers
+sizes are close to 700 MiB; considering the linear scaling we can easily
+predict the point where the garbled circuits would be too big to fit into the
+computer memory.
+
+\begin{table}
+    \begin{tabular}{l|*{4}{c}c}
+      & \textbf{Sum} & \textbf{Mult} & \textbf{Mean} & \textbf{Var} & \textbf{Min/Max} \\
+    \hline
+    \textbf{Reduction} & 06.63 \% & 09.76 \% & 06.87 \% & 09.68 \% & 14.47 \% \\
+    \end{tabular}
+    \caption{Number of gates reduction for each microbenchmark function we
+      would obtain by using the half-gates optimization.}
+    \label{micro-and}
+\end{table}
+
+Considering the fact that we are not using the half-gates size optimization in
+our garbled circuits, we show in figure~\ref{micro-and} the reduction we would
+observe for the experiments with 1000 Publishers if we had used such
+optimization (computed by counting the number of AND gates used in each
+circuit).  We observe the biggest reduction in the \emph{Min/Max} functions,
+leading us to conclude that implementing the half-gates optimization would be a
+clear improvement overall by reducing the sending time of the garbled circuits.
 
 \subsection{Applications}
+
+We have prepared 3 concrete applications based on real IoT datasets to show
+possible real usages of the presented protocol.
 
 % Turonet, wireless propagation constant, linear regression
 \paragraph{Linear regression}
@@ -115,8 +171,8 @@ implemented in go instead of C like the garbling and evaluation.
 % the formula description and linear regression explanation here.
 In this application we are interested in learning the linear model of two data
 streams generated by Publishers.  In particular, we perform a linear regression
-so that we can model one variable (comming from one stream) as a linear
-combination of another variable (comming from another stream): $y = ax + b$.
+so that we can model one variable (coming from one stream) as a linear
+combination of another variable (coming from another stream): $y = ax + b$.
 To estimate the parameters of the one dimensional linear model we use the
 ordinary least squares technique, which gives us the following closed-form
 formula:
