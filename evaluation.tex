@@ -170,6 +170,11 @@ with the given number of samples in a batch.
 %   Time permitting, it may be helpful to see how this scales as we go from
 % N=20 nodes to 40, 60, 80, 100 nodes.
 
+% > Okay, then I'll simulate an experiment where the Publishers initially
+% > send N-1 distances to the Broker, which would be stored for a day or
+% > something (not indefinitely because then we loose forward secrecy), and
+% > then they keep sending the N-1 signal strength periodically.
+
 % TODO: Evaluate (analytically) the bandwidth of the Publishers, which are
 % sending N-1 values per epoch each one.
 
@@ -178,6 +183,12 @@ with the given number of samples in a batch.
   \caption{Bla bla turonet.}
   \label{turonet-times}
 \end{figure}
+
+% At 30 Nodes, we are dealing with 30*29 = 870 samples to perform the
+% correlation, which corresponds to a garbled circuit of size bigger than 1
+% GiB, and hit a limit on the encoding used when marshaling the garbled circuit
+% in the go RPC implementation, which doesn't support data structures bigger
+% than 1 GiB.
 
 % TODO: 2. Environmental Berkeley indoor sensing data, correlation
 \paragraph{Correlation}
