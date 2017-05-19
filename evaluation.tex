@@ -366,6 +366,12 @@ the \broker is the most expensive part of the protocol, and thus is the current
 bottleneck.  This means that the quality and bandwidth of the network
 connection between the \broker and the \garbler is of critical importance.
 
+The actual fraction of time spent on sending the garbled circuit varies
+depending on the circuit function and the number of Publishers, ranging from
+about 50 \% as in the rank calculated in the \emph{daily statistics of airport
+parking lot} to about 80\% as in the \emph{wireless propagation constant}
+application with 25 nodes.
+
 The garbling and evaluation of the identity gates could be optimized by
 incorporating the operations in the C code of libgarble.  Even though the
 golang implementation of the AES encryption and decryption functions use the
