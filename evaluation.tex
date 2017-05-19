@@ -22,11 +22,6 @@ bandwidth network.  Since we know the size of the garbled circuit, we can
 easily compute the time required to transfer it over a Gigabit connection and
 add that delay to the measured time.
 
-Every measured time shown in this section (either in numerical form or in a
-plot) has been obtained by taking the mean out of 5 repetitions in the same
-configuration.  In the plots, a confidence interval of 95\% for the mean result
-(out of the 5 samples) is shown in gray.
-
 In all our measured times, sending includes the marshaling and unmarshaling of
 the garbled circuit and associated data structures necessary for transmitting
 it from the Third Party to the Broker via RPC.
@@ -60,9 +55,9 @@ variable number of Publishers.
         \label{fig:micro-send-time}
     \end{subfigure}
     \caption{Mean time required for garbling, evaluating and sending the
-    garbled circuit to the Broker for each function in the microbenchmark.
-    Sending includes the marshaling and unmarshaling of the garbled circuit and
-    associated data structures.}
+      garbled circuit to the Broker for each function in the microbenchmark.
+      Results obtained from the mean of 5 repetitions for each configuration,
+      with the confidence interval of 95\% shown in gray.}
     \label{fig:micro-times}
 \end{figure*}
 
@@ -75,7 +70,9 @@ variable number of Publishers.
 
 \begin{figure}
   \includegraphics[width=0.45\textwidth]{plots/enc_dec.png}
-  \caption{Time spent garbling and evaluating the identity input gates.}
+  \caption{Time spent garbling and evaluating the identity input gates.
+    Results obtained from the mean of all microbenchmark functions with 5
+    repetitions each, with the confidence interval of 95\% shown in gray.}
   \label{micro-inputs}
 \end{figure}
 
@@ -94,7 +91,7 @@ variable number of Publishers.
 \begin{figure}
   \includegraphics[width=0.45\textwidth]{plots/size_log.png}
   \caption{Size of the garbled circuit and the associated date required by the
-  Broker to evaluate it.}
+    Broker to evaluate it.}
   \label{micro-sizes}
 \end{figure}
 
@@ -143,7 +140,6 @@ time to perform a correlation analysis between the two.  For our experiments we
 vary the number of samples and simulate the application by supplying the Broker
 with the given number of samples in a batch.
 
-
 %  Say you have 20 nodes in the network. There are then at most 20*19
 % different links (some of these may not have any measurements because they
 % may be too far). For each active link at each time we will get a
@@ -180,7 +176,8 @@ with the given number of samples in a batch.
 
 \begin{figure}
   \includegraphics[width=0.45\textwidth]{plots/turonet.png}
-  \caption{Bla bla turonet.}
+  \caption{TODO turonet.  Results obtained from the mean of 5 repetitions for
+    each configuration, with the confidence interval of 95\% shown in gray.}
   \label{turonet-times}
 \end{figure}
 
@@ -222,9 +219,11 @@ operation.
 \begin{figure}
   \includegraphics[width=0.45\textwidth]{plots/stream.png}
   \caption{Mean time required for garbling, evaluating and sending the garbled
-  circuit to the Broker for computing the correlation and linear regression of
-  data streams.  Garbling and evaluating
-  includes the time to garble and evaluate the input identity.}
+    circuit to the Broker for computing the correlation and linear regression
+    of data streams.  Garbling and evaluating includes the time to garble and
+    evaluate the input identity.  Results obtained from the mean of 5
+    repetitions for each configuration, with the confidence interval of 95\%
+    shown in gray.}
   \label{stream-times}
 \end{figure}
 
@@ -264,9 +263,10 @@ happens once per day.
     Rank free  & 121.3 ms & 181.0 ms & 67.5 ms & 17.0 MB \\
     \end{tabular}
     \caption{Mean time required for the different steps of the protocol to
-    evaluate different statistical measures of the parking lot dataset.
-    Garbling and evaluating includes the time to garble and evaluate the input
-    identity.}
+      evaluate different statistical measures of the parking lot dataset.
+      Garbling and evaluating includes the time to garble and evaluate the
+      input identity.  Results obtained from the mean of 5 repetitions for each
+      configuration, with the confidence interval of 95\% shown in gray.}
     \label{stats-times}
 \end{figure}
 
