@@ -4,17 +4,17 @@
 \subsection{Setup}
 
 We have evaluated our implementation in an environment consisting on two
-computers located in the same Gigabit Ethernet network.  We run the Broker,
-Third Party and one Subscriber on the first computer, and all the Publishers in
+computers located in the same Gigabit Ethernet network.  We run the \broker,
+\garbler and one Subscriber on the first computer, and all the Publishers in
 the second computer.  We perform all the analysis on the performance of several
-operations in the Broker and Third Party, which run together in a computer
+operations in the \broker and \garbler, which run together in a computer
 running Arch Linux (kernel 4.8.17-grsec) with an Intel Core i7-6600U CPU with
-16GB of RAM.  In order to isolate the performance influence of the Broker and
-the Third Party, we have serialized the garbling and evaluation of the garbled
-circuit operations, mimicking the situation in which the Broker and Third Party
+16GB of RAM.  In order to isolate the performance influence of the \broker and
+the \garbler, we have serialized the garbling and evaluation of the garbled
+circuit operations, mimicking the situation in which the \broker and \garbler
 are run on different servers.
 
-Since the Broker and the Third Party are running on the same computer, we won't
+Since the \broker and the \garbler are running on the same computer, we won't
 observe the delay introduced by transferring the garbled circuit over a
 physical network.  For this reason we obtain an estimation of the time required
 to send the garbled circuit by simulating a transmission over a Gigabit
@@ -24,18 +24,11 @@ add that delay to the measured time.
 
 In all our measured times, sending includes the marshaling and unmarshaling of
 the garbled circuit and associated data structures necessary for transmitting
-it from the Third Party to the Broker via RPC.
+it from the \garbler to the \broker via RPC.
 
 \subsection{Microbenchmarks}
 
-We have selected 5 numerical operations of varying complexity (\emph{summation,
-multiplication, mean, variance, minimum/maximum}) to evaluate the cost of the
-different parts of our implementation.  We securely evaluate these functions
-over the values (encoded as 32 bit fixed point numbers) received from a
-variable number of Publishers.
-
-% Plots
-\begin{figure*}
+\begin{figure*}[ht]
     \centering
     \begin{subfigure}[b]{0.32\textwidth}
         \includegraphics[width=\textwidth]{plots/garble_loglog.png}
@@ -55,11 +48,17 @@ variable number of Publishers.
         \label{fig:micro-send-time}
     \end{subfigure}
     \caption{Mean time required for garbling, evaluating and sending the
-      garbled circuit to the Broker for each function in the microbenchmark.
+      garbled circuit to the \broker for each function in the microbenchmark.
       Results obtained from the mean of 5 repetitions for each configuration,
       with the confidence interval of 95\% shown in gray.}
     \label{fig:micro-times}
 \end{figure*}
+
+We have selected 5 numerical operations of varying complexity (\emph{summation,
+multiplication, mean, variance, minimum/maximum}) to evaluate the cost of the
+different parts of our implementation.  We securely evaluate these functions
+over the values (encoded as 32 bit fixed point numbers) received from a
+variable number of Publishers.
 
 In figure~\ref{fig:micro-times} we show the timing results for the most
 relevant steps of the secure computation happening between the \broker and the
@@ -88,7 +87,7 @@ part of the protocol is implemented in go instead of C like the garbling and
 evaluation.
 
 \begin{figure}
-  \includegraphics[width=0.38\textwidth]{plots/enc_dec.png}
+  \includegraphics[width=0.35\textwidth]{plots/enc_dec.png}
   \caption{Time spent garbling and evaluating the identity input gates.
     Results obtained from the mean of all microbenchmark functions with 5
     repetitions each, with the confidence interval of 95\% shown in gray.}
@@ -101,7 +100,7 @@ garbling to be roughly twice the times of evaluating (garbling involves
 encrypting two labels whereas evaluating involves decrypting one)
 
 \begin{figure}
-  \includegraphics[width=0.38\textwidth]{plots/nonxor_gates_log.png}
+  \includegraphics[width=0.35\textwidth]{plots/nonxor_gates_log.png}
   \caption{Non-XOR gates count per function used in the microbenchmarks.}
   \label{micro-nonxor}
 \end{figure}
@@ -114,9 +113,9 @@ comparing shape of the plot with timing results shown in
 figure~\ref{fig:micro-times}.
 
 \begin{figure}
-  \includegraphics[width=0.38\textwidth]{plots/size_log.png}
+  \includegraphics[width=0.35\textwidth]{plots/size_log.png}
   \caption{Size of the garbled circuit and the associated date required by the
-    Broker to evaluate it.}
+    \broker to evaluate it.}
   \label{micro-sizes}
 \end{figure}
 
@@ -147,7 +146,7 @@ computer memory.
 \end{table}
 
 Considering the fact that we are not using the half-gates size optimization in
-our garbled circuits, we show in figure~\ref{micro-and} the reduction we would
+our garbled circuits, we show in table~\ref{micro-and} the reduction we would
 observe for the experiments with 1000 Publishers if we had used such
 optimization (computed by counting the number of AND gates used in each
 circuit).  We observe the biggest reduction in the \emph{Min/Max} functions,
@@ -173,20 +172,23 @@ Each node periodically publishes the received signal strength ($RSS$) in dBm of
 the nodes it is connected to; and this measure can fluctuate over time due to
 fading.
 
-We are interested in estimating the wireless propagation constant ($eta$) in
+We are interested in estimating the wireless propagation constant ($\eta$) in
 the medium while preserving the privacy of the nodes (that is, their location,
-the distance between nodes and their reported signal strength measures).  $eta$
-can be derived from the following formula: $RSS = -10 \cdot eta \cdot
-log_{10}(distance)$.  We will estimate $eta$ by finding a linear model for the
-$RSS$-distances pairs obtained from the nodes.
+the distance between nodes and their reported signal strength measures).
+The value of $\eta$ can be useful in characterizing the radio propagation
+environment and performance of the network and it can be derived from the
+following formula: \mbox{$RSS = -10 \cdot \eta \cdot log_{10}(distance) - C$}.
+We will estimate $\eta$ by finding a linear model for the $RSS$-distances pairs
+obtained from the nodes.
 
 % This was my original interpretation.  Since we already have the experiments,
 % let's move this to the Environmental Berkeley indoor sensing data, but leave
 % the formula description and linear regression explanation here.
 In particular, we perform a linear regression so that we can model the $RSS$ as
-a linear combination of the distance.  To estimate the parameters of the one
-dimensional linear model ($y = ax + b$) we use the ordinary least squares
-technique, which gives us the following closed-form formula:
+a linear combination of a logarithmic function of the distance.  To estimate
+the parameters of the one dimensional linear model ($y = ax + b$) we use the
+ordinary least squares technique, which gives us the following closed-form
+formula:
 
 \[
 \begin{pmatrix} b \\ c \end{pmatrix} =
@@ -201,19 +203,19 @@ by following the analytic solution.
 
 For the evaluation of this application we construct a virtual scenario which
 simulates the IoT nodes by running one Publisher per node in a separate
-computer.  The Publishers will publish the distances to their peers as an
-initial step, allowing the \broker to store these values for some time avoiding
-the constant retransmission of these constants.  After this, the Publishers
-will be sending values at the same rate of the nodes in order to obtain the
-same performance results we would get by using live data from the actual
-testbed.  Following our protocol, we will be estimating the wireless
+computer.  The Publishers will publish the $log_{10}$ of the distances to their
+peers as an initial step, allowing the \broker to store these values for some
+time avoiding the constant retransmission of these constants.  After this, the
+Publishers will be sending values at the same rate of the nodes in order to
+obtain the same performance results we would get by using live data from the
+actual testbed.  Following our protocol, we will be estimating the wireless
 propagation constant periodically, using the values received form the
 Publishers.  We will vary the number of Publishers to analyze how this
 application scales (notice that the number of inputs for the linear regression
 formula grows quadratically when the number of nodes increases linearly)
 
 \begin{figure}
-  \includegraphics[width=0.38\textwidth]{plots/turonet.png}
+  \includegraphics[width=0.35\textwidth]{plots/turonet.png}
   \caption{Mean time required for garbling, evaluating and sending the garbled
     circuit to the \broker for a varying number of nodes in the \emph{wireless
     propagation constant} application.  Results obtained from the mean of 5
@@ -225,7 +227,7 @@ formula grows quadratically when the number of nodes increases linearly)
 We show the results of the evaluation in figure~\ref{turonet-times}, where we
 can clearly see that the cost for this application quickly grows with the
 number of nodes.  Our experiments end at 25 nodes because at at 30 Nodes we
-would be dealing with $30 \ cdot 29 = 870$ samples to perform the correlation,
+would be dealing with $30 \cdot 29 = 870$ samples to perform the correlation,
 which corresponds to a garbled circuit of size bigger than 1 GiB.  At this
 magnitude we hit a limit on the encoding used when marshaling the garbled
 circuit in the go RPC implementation, which doesn't support data structures
@@ -250,11 +252,11 @@ coming from a different sensor, while maintaining the individual readings
 private.
 
 In this application's scenario, we assume that each sensor would be an
-individual Publisher that sends readings periodically.  The Broker would
+individual Publisher that sends readings periodically.  The \broker would
 accumulates streams of published values from each sensor, and when requested,
 the it would samples pairs of those streams at random over a specific period of
 time to perform a correlation analysis between the two.  For our experiments we
-vary the number of samples and simulate the application by supplying the Broker
+vary the number of samples and simulate the application by supplying the \broker
 with the given number of samples in a batch.
 
 % Formula:
@@ -280,9 +282,9 @@ number of samples, which also gives us information about the relationship
 between the two data streams.
 
 \begin{figure}
-  \includegraphics[width=0.38\textwidth]{plots/stream.png}
+  \includegraphics[width=0.35\textwidth]{plots/stream.png}
   \caption{Mean time required for garbling, evaluating and sending the garbled
-    circuit to the Broker for computing the squared correlation and linear
+    circuit to the \broker for computing the squared correlation and linear
     regression of data streams.  Garbling and evaluating includes the time to
     garble and evaluate the input identity.  Results obtained from the mean of
     5 repetitions for each configuration, with the confidence interval of 95\%
@@ -316,7 +318,7 @@ privacy of the individual parking lots values.
 For this scenario, we will have 9 Publishers, one for each lot, which will be
 sending the current number of free and occupied spots every 5 minutes.  We
 simulate the Publishers by running them together in a single computer.  The
-Broker will accumulate the data from each day and compute the daily statistics.
+\broker will accumulate the data from each day and compute the daily statistics.
 
 Using the occupied spots data, we will provide the \emph{mean}, \emph{min/max},
 and \emph{variance} of the number of cars in all the lots combined during a
@@ -359,10 +361,10 @@ from the microbenchmarks; and the cheapest one is the \emph{rank}.
 
 \subsection{Discussion}
 
-As expected, the time spent sending the garbled circuit from the Third Party to
-the Broker is the most expensive part of the protocol, and thus is the current
+As expected, the time spent sending the garbled circuit from the \garbler to
+the \broker is the most expensive part of the protocol, and thus is the current
 bottleneck.  This means that the quality and bandwidth of the network
-connection between the Broker and the Third Party is of critical importance.
+connection between the \broker and the \garbler is of critical importance.
 
 The garbling and evaluation of the identity gates could be optimized by
 incorporating the operations in the C code of libgarble.  Even though the
@@ -373,6 +375,6 @@ natively with 128 bits data types (the size of an AES block) by using the Intel
 SSE2 extensions, thus not requiring any conversion during
 encryption/decryption.
 
-% TODO: Add more stuff here!
+% TODO: Explain fraction of time spent on garbling, sending and evaluating.
 
-% TODO: Move plots around
+% TODO: Add more stuff here!
