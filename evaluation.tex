@@ -199,17 +199,6 @@ technique, which gives us the following closed-form formula:
 Evaluating the formula requires an inversion of a $2 x 2$ matrix, which we perform
 by following the analytic solution.
 
-%We evaluate the cost of computing the one-dimensional linear regression over
-%two streams with a varying number of samples.
-%
-%In this application's scenario, we assume that each sensor would be an
-%individual Publisher that sends readings periodically.  The Broker would
-%accumulates streams of published values from each sensor, and when requested,
-%the it would samples pairs of those streams at random over a specific period of
-%time to perform a correlation analysis between the two.  For our experiments we
-%vary the number of samples and simulate the application by supplying the Broker
-%with the given number of samples in a batch.
-
 For the evaluation of this application we construct a virtual scenario which
 simulates the IoT nodes by running one Publisher per node in a separate
 computer.  The Publishers will publish the distances to their peers as an
@@ -256,24 +245,28 @@ lab\footnote{\url{http://db.csail.mit.edu/labdata/labdata.html} (accessed
 from sensors with the following values: temperature in degree Celcius, humidity
 in percentage and light measured in Lux.
 
-% Ideas: correlation temperature~humidity, temperature~light.
+We are interested in finding relationships between pairs of data streams, each
+coming from a different sensor, while maintaining the individual readings
+private.
 
-Similarly to the linear regression application, in this application we have the
-same scenario with sensors acting as Publishers sending a periodic stream of
-reads.  Again, for our experiments we simplify the setting by supplying the
-Broker with a specific number of samples in a batch.  We evaluate the cost of
-the operation by varying the number of samples as before.
+In this application's scenario, we assume that each sensor would be an
+individual Publisher that sends readings periodically.  The Broker would
+accumulates streams of published values from each sensor, and when requested,
+the it would samples pairs of those streams at random over a specific period of
+time to perform a correlation analysis between the two.  For our experiments we
+vary the number of samples and simulate the application by supplying the Broker
+with the given number of samples in a batch.
 
 % Formula:
 The correlation is a measure of statistical relationship among pairs of
-variables, which higher value representing higher dependence.  Following the
+variables in which higher value represents higher dependence.  Following the
 Pearson's product-moment coefficient, we can measure the dependence between
 samples of two variables (in our case, sensor readings) using the following
 closed-form formula:
 
 \[
 r_{xy} = \frac{\displaystyle\sum_{i=1}^n (x_i - \bar{x}) (y_i - \bar{y})}
-{\sqrt{\displaystyle\sum_{i=1}^n (x_i - \bar{x})^n (y_i - \bar{y})^n}}
+{\sqrt{\displaystyle\sum_{i=1}^n (x_i - \bar{x})^2 (y_i - \bar{y})^2}}
 \]
 \bigskip
 
@@ -281,42 +274,55 @@ To improve efficiency, we evaluate the squared correlation ($r_{xy}^2$) to avoid
 computing the square root in the function circuit, which would be an expensive
 operation.
 
+As a comparison, we will also evaluate the cost of computing the
+one-dimensional linear regression over two streams of values with a varying
+number of samples, which also gives us information about the relationship
+between the two data streams.
+
 \begin{figure}
   \includegraphics[width=0.38\textwidth]{plots/stream.png}
   \caption{Mean time required for garbling, evaluating and sending the garbled
-    circuit to the Broker for computing the correlation and linear regression
-    of data streams.  Garbling and evaluating includes the time to garble and
-    evaluate the input identity.  Results obtained from the mean of 5
-    repetitions for each configuration, with the confidence interval of 95\%
+    circuit to the Broker for computing the squared correlation and linear
+    regression of data streams.  Garbling and evaluating includes the time to
+    garble and evaluate the input identity.  Results obtained from the mean of
+    5 repetitions for each configuration, with the confidence interval of 95\%
     shown in gray.}
   \label{stream-times}
 \end{figure}
 
+As we can see in figure~\ref{stream-times} the cost of computing the
+correlation is roughly the double of the cost of computing the linear
+regression.  Taking this result into consideration, we could devise a more
+efficient statistical relationship measure: for instance, we could first
+compute the linear regression and then find a normalized error between the
+linear model and the samples.
+
 % LAX parking lot dataset, statistics
-\paragraph{Continuous statistics of incoming data}
+\paragraph{Daily statistics of airport parking lots}
 
-\footnote{\url{https://data.lacity.org/dataset/Los-Angeles-International-Airport-LAX-Parking-Lots/dik5-hwp6} (accessed 2017-05-18)}
+The dataset for this application is the live status of the parking lots of a
+major
+airport\footnote{\url{https://data.lacity.org/dataset/Los-Angeles-International-Airport-LAX-Parking-Lots/dik5-hwp6}
+(accessed 2017-05-18)}.  In particular, the airport provides updates of the
+number of occupied and free parking spaces for each one of the 9 parking lots
+every 5 minutes.  This makes a total of 288 published values per day per
+parking lot.
 
-% The dataset provides at a frequency of every 5 minutes and for every one of
-% the 9 parking lots: total, occupied and free parking spaces.
-% That's 288 values per day per parking lot.
+In such application we would be interested in obtaining daily statistics of the
+parking lots without revealing data at fine time granularity.  We will only
+allow obtaining data accumulated throughout the day while preserving the
+privacy of the individual parking lots values.
 
-% Privacy: Avoid revealing parking lot data at fine granularity, only reveal
-% statistics of the data accumulated throughout the day.  Don't reveal data of
-% individual parking lots, only combined data (except for the lot with
-% more/less free spots)
+For this scenario, we will have 9 Publishers, one for each lot, which will be
+sending the current number of free and occupied spots every 5 minutes.  We
+simulate the Publishers by running them together in a single computer.  The
+Broker will accumulate the data from each day and compute the daily statistics.
 
-Setting: We have 9 Publishers, one for each lot, which send data (current
-number of free spots, current number of used spots) every 5 minutes.  The
-Broker accumulates the data of a day and computes the statistics.  This
-happens once per day.
-
-% Daily statistics (used spots): mean, max, min, var of the number of cars in all the lots combined.
-% Daily statistics (free spots): The marking lot which had more free spots, and the one
-% that had less on average during the day.
-
-% Time garble and time eval includes the time spend encrypting and decrypting
-% the input values.
+Using the occupied spots data, we will provide the \emph{mean}, \emph{min/max},
+and \emph{variance} of the number of cars in all the lots combined during a
+day.  Using the free spots data, we will compute which lot had more free spots
+and which one had less free spots on average during the day.  We will refer to
+this later result as the \emph{rank}.
 
 \begin{table}
     \begin{tabular}{l*{3}{r}r}
@@ -332,9 +338,16 @@ happens once per day.
       evaluate different statistical measures of the parking lot dataset.
       Garbling and evaluating includes the time to garble and evaluate the
       input identity.  Results obtained from the mean of 5 repetitions for each
-      configuration, with the confidence interval of 95\% shown in gray.}
+      configuration.}
     \label{stats-times}
 \end{table}
+
+We can see the results of the evaluation in table~\ref{stats-times}.  We
+observe that for the given amount of daily data, the statistics can be computed
+in a short period of time; the \broker and \garbler could be computing daily
+statistics from data coming from many more sources.  The most expensive
+operation is the \emph{variance}, which coincides with the results obtained
+from the microbenchmarks; and the cheapest one is the \emph{rank}.
 
 % SKIP: 3. Road Volume sensor traffic, evaluation of the expected time to follow a path
 %\paragraph{Estimation of time required to follow a path with traffic}
@@ -343,6 +356,8 @@ happens once per day.
 % SKIP: 5. Smart bill, monthly electricity bill with different cost per hour of the day / threshold.
 
 % TODO: Discussion: bottlenecks.
+
+\subsection{Discussion}
 
 As expected, the time spent sending the garbled circuit from the Third Party to
 the Broker is the most expensive part of the protocol, and thus is the current
@@ -357,3 +372,7 @@ and vice versa slow down the operation.  On the other hand, libgarble works
 natively with 128 bits data types (the size of an AES block) by using the Intel
 SSE2 extensions, thus not requiring any conversion during
 encryption/decryption.
+
+% TODO: Add more stuff here!
+
+% TODO: Move plots around
