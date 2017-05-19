@@ -67,8 +67,9 @@ reveal its own output, which is also possible in the ideal world execution.\\[6p
 
 In base protocol, Figure~\ref{fig:baseprotocol}, we execute a new instance of
 private-set-intersection-cardinality (PSI-C) protocol for every input
-bit of the circuit, which is expensive.  We present a more efficient wire
-labels consistency checking protocol in Figure~\ref{fig:label_consistency}. 
+bit of the circuit, which is expensive.  We present an efficient wire labels
+consistency checking protocol in Figure~\ref{fig:label_consistency}, which we
+use in our system.
 
 This protocol uses private-set-intersection (PSI) from~\cite{Pinkas0Z14} as
 opposed to private-set-intersection-cardinality (PSI-C) and only \broker learns
@@ -86,16 +87,11 @@ with at least $1$ inconsistent wire label.
 
 \input{input_consistency_protocol}
 
-
-\paragraph{Garbled Circuit XOR Compatibility.}
-
-
-* What if one publisher doesn't send wire labels. After timeout the broker can
-inform the \garbler and it will use zero for such values in the circuit.
+%TODO
 
 \improvement{We can hide $C$ using universal circuits.}
-\unsure{Who forms the topics? Publishers, clients, or broker?}
 
+\unsure{Who forms the topics? Publishers, clients, or broker?}
 
 \improvement{Using cut and choose for malicious security}
 
