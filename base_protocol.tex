@@ -2,7 +2,7 @@
 \begin{mdframed}[style=myframe]
 
 \initialize
-\begin{itemize}[leftmargin=*,itemsep=4pt,topsep=4pt]
+\begin{itemize}[leftmargin=*,itemsep=2pt,topsep=2pt]
  
 	\item Each new publisher sends \broker a \policy specifying allowed
 		computations on its data.
@@ -10,7 +10,7 @@
 \end{itemize}
 
 \subscribe
-\begin{itemize}[leftmargin=*,itemsep=4pt,topsep=4pt]
+\begin{itemize}[leftmargin=*,itemsep=2pt,topsep=2pt]
 
 	\item To subscribe computation $C$, subscriber sends a subscription request
 		containing $C$ to \broker. If \broker allows subscriber to learn $C$'s
@@ -19,7 +19,7 @@
 \end{itemize}
 
 \publish
-\begin{itemize}[leftmargin=*,itemsep=4pt,topsep=4pt,after=]
+\begin{itemize}[leftmargin=*,itemsep=2pt,topsep=2pt,after=]
 		
 	\item To publish $k$th value, publisher generates two pseudorandom wire
 		labels, $w_0$ and $w_1$, for each bit of the value. 
@@ -30,7 +30,7 @@
 \end{itemize}
 
 \process
-\begin{itemize}[leftmargin=*,itemsep=4pt,topsep=4pt]
+\begin{itemize}[leftmargin=*,itemsep=2pt,topsep=2pt]
 
 	\item \broker waits for a specified time period $t$ to receive input wire
 		labels, a single label $w_b$ for a bit $b$, from a subset of publishers

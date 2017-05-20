@@ -2,7 +2,7 @@
 \begin{mdframed}[style=myframe]
 
 \initialize
-\begin{itemize}[leftmargin=*,itemsep=4pt,topsep=4pt]
+\begin{itemize}[leftmargin=*,itemsep=2pt,topsep=2pt]
  
 	\item Each new publisher generates and sends to \garbler a truly random seed
 		$s$. This seed will be used to create wire labels without interaction.
@@ -10,7 +10,7 @@
 \end{itemize}
 
 \subscribe
-\begin{itemize}[leftmargin=*,itemsep=4pt,topsep=4pt]
+\begin{itemize}[leftmargin=*,itemsep=2pt,topsep=2pt]
 
 	\item In addition to registering subscription with \broker, subscribers for a
 		computation $C$ also register with \garbler. \garbler sends a truly
@@ -21,7 +21,7 @@
 \end{itemize}
 
 \publish
-\begin{itemize}[leftmargin=*,itemsep=4pt,topsep=4pt]
+\begin{itemize}[leftmargin=*,itemsep=2pt,topsep=2pt]
 		
 	\item To publish $k$th value, publisher generates two pseudorandom wire
 		labels, $w_0$ and $w_1$, using seed $s$ in a pseudorandom number generator
@@ -35,7 +35,7 @@
 \end{itemize}
 
 \process
-\begin{itemize}[leftmargin=*,itemsep=4pt,topsep=4pt]
+\begin{itemize}[leftmargin=*,itemsep=2pt,topsep=2pt]
 
 	\item \garbler independently generates input wire labels using seed $s$ from
 		each publisher contributing input and an output mask $r$ using seed $s'$
@@ -43,17 +43,17 @@
 
 \end{itemize}
 
-\vspace{4pt}
+\vspace{2pt}
 
 \textbf{Forward Secure Seeds}
-\vspace{4pt}
+\vspace{2pt}
 
 Following procedure ensures that seeds $s$ and $s'$ used above are forward
 	secure, i.e., compromise of seed does not affect the confidentiality of past
 	data. We adapt Signal, a popular secure messaging protocol, key ratcheting
 	protocol for forward security.
 
-\begin{itemize}[leftmargin=*,itemsep=4pt,topsep=4pt]
+\begin{itemize}[leftmargin=*,itemsep=2pt,topsep=2pt]
 
 	\item Generate a truly random key $K_0$.
 
