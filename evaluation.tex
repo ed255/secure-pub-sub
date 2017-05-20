@@ -35,6 +35,7 @@ In all our measured times, sending includes the marshaling and unmarshaling of
 the garbled circuit and associated data structures necessary for transmitting
 it from the \garbler to the \broker via RPC.
 
+\vspace{-10pt}
 \subsection{Microbenchmarks}
 
 \begin{figure*}[ht]
@@ -170,13 +171,14 @@ circuit).  We observe the biggest reduction in the \emph{Min/Max} functions,
 leading us to conclude that implementing the half-gates optimization would be a
 clear improvement overall by reducing the sending time of the garbled circuits.
 
+\vspace{-4pt}
 \subsection{Applications}
 
 We have prepared 3 concrete applications based on real IoT datasets to show
 possible real usages of the presented protocol.
 
 % Turonet, wireless propagation constant, linear regression
-\bigskip
+\smallskip
 \noindent\textbf{Wireless propagation constant}
 
 \noindent In this application we take the real time data provided by a testbed of IoT
@@ -255,7 +257,7 @@ interconnected, which will usually not be the case when the number of nodes
 reaches a significant value.
 
 % Environmental Berkeley indoor sensing data, correlation
-\bigskip
+\smallskip
 \noindent\textbf{Correlation of environmental indoor sensing data}
 
 \noindent For this application we will be using the environmental indoor sensing data
@@ -284,6 +286,7 @@ Pearson's product-moment coefficient, we can measure the dependence between
 samples of two variables (in our case, sensor readings) using the following
 closed-form formula:
 
+\vspace{-8pt}
 \[
 r_{xy} = \frac{\displaystyle\sum_{i=1}^n (x_i - \bar{x}) (y_i - \bar{y})}
 {\sqrt{\displaystyle\sum_{i=1}^n (x_i - \bar{x})^2 (y_i - \bar{y})^2}}
@@ -317,7 +320,7 @@ compute the linear regression and then find a normalized error between the
 linear model and the samples.
 
 % LAX parking lot dataset, statistics
-\bigskip
+\smallskip
 \noindent\textbf{Daily statistics of airport parking lots}
 
 \noindent The dataset for this application is the live status of the parking lots of a
@@ -379,6 +382,7 @@ from the microbenchmarks; and the cheapest one is the \emph{rank}.
 
 % TODO: Discussion: bottlenecks.
 
+\vspace{-4pt}
 \subsection{Discussion}
 
 \noindent\textbf{Bottlenecks.}  As expected, the time spent sending the garbled

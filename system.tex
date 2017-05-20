@@ -76,6 +76,7 @@ particular, every secret bit transferred from or to a client (which will either
 be an input bit or an output bit of the garbled circuit) will be expanded to
 128 bits.
 
+\vspace{-4pt}
 \subsection{Extending \libgarble.}
 
 \libgarble{}~\cite{libgarble} is a garbling library written in C based on
@@ -125,6 +126,7 @@ we implemented the simplest non-optimized division algorithm: division by
 repeated subtraction with a fixed number of iterations (assuming the worst
 case).
 
+\vspace{-8pt}
 \subsection{High level language to build circuits.}
 
 While \libgarble{} exposes the functions needed to build circuits corresponding
@@ -185,6 +187,7 @@ Four our implementation we decided to use the same representation for all
 numerical values: two's complement fixed point 32 bit numbers, with 26 bits for
 the integer part and 8 bits for the decimal part.
 
+\vspace{-4pt}
 \subsection{\broker and \garbler.}
 
 The \broker and the \garbler have been written in the Go programming
@@ -222,6 +225,7 @@ corresponding publisher ratchet key round, and of requesting the garbling of
 circuits to the \garbler (for those particular Publishers values rounds) to
 evaluate the garbled circuit and send the result to the subscribed Subscribers.
 
+\vspace{-4pt}
 \subsection{Publisher and Subscriber.}
 
 The Publisher has been written in C in order to minimize its memory footprint
@@ -242,6 +246,7 @@ to establish the ratchet keys happens through a message exchange with the
 per-device specific topic.  The device specific topic is formed using the
 Client's (Subscriber or Publisher) public key.
 
+\vspace{-4pt}
 \subsection{Identity Gates for FreeXOR Compatibility.}
 
 The free XOR optimization in garbled circuits require that for every wire, the
@@ -261,6 +266,7 @@ inputs.
 
 % OTHER STUFF
 
+\vspace{-4pt}
 \subsection{Cryptographic choices}
 
 For all the cryptographic operations we have used the \emph{libsodium} C
