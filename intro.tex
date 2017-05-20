@@ -25,22 +25,23 @@ The first generation of IoT systems involving large numbers of densely-deployed
 real-time streaming sensors such as traffic road sensor
 deployments~\cite{pems17}, and air quality measurement~\cite{aqmd17} have
 largely focused on monolithic, vertically integrated applications with
-essentially a single collection point (which serves as a independent
+essentially a single collection point (which serves as an independent
 application-specific gateway for other applications to pull data from, in some
 cases through the provision of suitable API's, or simply through web-scraping). 
 
 However, there is a growing recognition that it is desirable to utilize
 application-agnostic middleware that allows the number of consumption points to
-scale. Thus there has been a concerted effort to build and deploy IoT
+scale. Thus, there has been a concerted effort to build and deploy IoT
 applications using real-time multi-point to multi-point middleware (that sits
 above the transport layer), and the most commonly used pattern for this kind of
 communication is the publish-subscribe paradigm~\cite{pubsub}.
 Publish-Subscribe middleware allow multiple data consumers to connect to and
 receive streams of real time data from large numbers of sensors. Commonly used
-examples of publish-subscribe middleware protocols are AQMP and
-MQTT~\cite{mqtt}, and also on the rise are commercial publish-subscribe
-platform as a service (PaaS) providers such as PubNub~\cite{pubnub} which
-provide their own proprietary protocol and API.  
+examples of publish-subscribe middleware protocols are Advanced Message Queuing
+Protocol (AMQP)~\cite{amqp} and Message Queue Telemetry Transport (MQTT)~\cite{mqtt}, and
+also on the rise are commercial publish-subscribe platform as a service (PaaS)
+providers such as PubNub~\cite{pubnub} which provide their own proprietary
+protocol and API.  
 
 The basic idea behind publish-subscribe systems such as MQTT is that there is a
 broker (typically centralized and implemented on a cloud server, such as the
