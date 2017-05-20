@@ -1,1 +1,20 @@
 \section{Conclusion}
+
+We have proposed and implemented a secure computation protocol for the
+Publish-Subscribe model.  By leveraging on the IoT \MQTT protocol we can offer
+a protocol that is lightweight on the Publisher and Subscriber side.
+
+From the evaluation of the system we conclude that it is computationally
+efficient to run both basic arithmetic functions like summation, minimum and
+variance; as well as more complex ones like correlation and linear regression
+securely on a significant number of input values.
+In particular, our system is able to compute the one-dimensional linear regression of 600
+samples in $10.5$ seconds, it can also compute 4 basic statistical parameters
+(mean, max/min, variance) on the daily accumulated data from streams publishing
+at 5 minutes interval in less than 7 seconds.
+
+In general, the most expensive part of the protocol is sending the garbled
+circuit, being usually more than half of the overall cost in garbled circuits.
+The second most expensive part is running the Private Set Intersection required
+to detect malicious Publishers; which we believe could be improved in the future.
+
