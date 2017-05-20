@@ -94,7 +94,19 @@ confidentiality. An application that wishes to make use of a third-party MQTT
 server for traditional pub-sub messaging could always encrypt the data end to
 end to provide confidentiality guarantees. But with computational functionality
 being moved to the server, these guarantees no longer hold. This is the focus
-of our work.\\[6pt]
+of our work.
+
+We propose a secure publish-process-subscribe protocol based on Yao's garbled
+circuits and private-set-intersection-cardinality (PSI-C). We present security
+definition for a secure publish-process-subscribe protocol in the REAL/IDEAL
+paradigm and provide a simulation based proof. We also develop extensions for
+reducing the communication and a private-set-intersection (PSI) based efficient
+wire label consistency protocol. We built a full-fledged system and developed a
+range of system techniques, such as, developing a new high-level functional
+language to describe computations and generate circuits, extending garbled
+circuits library libgarble, identity gates to make our protocol compatible with
+FreeXOR optimization, and establish authenticated and encrypted channel on top
+of MQTT.  \\[6pt]
 \noindent\textbf{Contributions.}
 
 \begin{itemize}[leftmargin=*,itemsep=4pt,topsep=4pt]
