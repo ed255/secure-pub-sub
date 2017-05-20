@@ -104,7 +104,7 @@ than the later two functions when the number of Publishers well passes the
 thousands.
 
 \begin{figure}
-  \includegraphics[width=0.35\textwidth]{plots/enc_dec.png}
+  \includegraphics[width=0.32\textwidth]{plots/enc_dec.png}
   \caption{Time spent garbling and evaluating the identity input gates.
     Results obtained from the mean of all microbenchmark functions with 5
     repetitions each, with the confidence interval of 95\% shown in gray.}
@@ -117,7 +117,7 @@ garbling to be roughly twice the times of evaluating (garbling involves
 encrypting two labels whereas evaluating involves decrypting one)
 
 \begin{figure}
-  \includegraphics[width=0.35\textwidth]{plots/nonxor_gates_log.png}
+  \includegraphics[width=0.32\textwidth]{plots/nonxor_gates_log.png}
   \caption{Non-XOR gates count per function used in the microbenchmarks.}
   \label{micro-nonxor}
 \end{figure}
@@ -130,7 +130,7 @@ comparing shape of the plot with timing results shown in
 figure~\ref{fig:micro-times}.
 
 \begin{figure}
-  \includegraphics[width=0.35\textwidth]{plots/size_log.png}
+  \includegraphics[width=0.32\textwidth]{plots/size_log.png}
   \caption{Size of the garbled circuit and the associated date required by the
     \broker to evaluate it.}
   \label{micro-sizes}
@@ -214,7 +214,6 @@ formula:
   \begin{pmatrix} 1 & x_i\end{pmatrix}\right)^{-1}
 \left( \displaystyle\sum_{i=1}^n y_i \begin{pmatrix} 1 \\ x_i \end{pmatrix}\right)
 \]
-\vspace{1mm}
 
 Evaluating the formula requires an inversion of a $2 x 2$ matrix, which we perform
 by following the analytic solution.
@@ -233,7 +232,7 @@ application scales (notice that the number of inputs for the linear regression
 formula grows quadratically when the number of nodes increases linearly)
 
 \begin{figure}
-  \includegraphics[width=0.35\textwidth]{plots/turonet.png}
+  \includegraphics[width=0.32\textwidth]{plots/turonet.png}
   \caption{Mean time required for garbling, evaluating and sending the garbled
     circuit to the \broker for a varying number of nodes in the \emph{wireless
     propagation constant} application.  Results obtained from the mean of 5
@@ -289,7 +288,6 @@ closed-form formula:
 r_{xy} = \frac{\displaystyle\sum_{i=1}^n (x_i - \bar{x}) (y_i - \bar{y})}
 {\sqrt{\displaystyle\sum_{i=1}^n (x_i - \bar{x})^2 (y_i - \bar{y})^2}}
 \]
-\vspace{1mm}
 
 To improve efficiency, we evaluate the squared correlation ($r_{xy}^2$) to avoid
 computing the square root in the function circuit, which would be an expensive
@@ -301,7 +299,7 @@ number of samples, which also gives us information about the relationship
 between the two data streams.
 
 \begin{figure}
-  \includegraphics[width=0.35\textwidth]{plots/stream.png}
+  \includegraphics[width=0.32\textwidth]{plots/stream.png}
   \caption{Mean time required for garbling, evaluating and sending the garbled
     circuit to the \broker for computing the squared correlation and linear
     regression of data streams.  Garbling and evaluating includes the time to
