@@ -417,14 +417,13 @@ with the minimum fluctuation, but in a real system, several functions could be
 run at the same time allowing for concurrent garbling and evaluation making use
 of all the CPU cores available.
 
-\noindent\textbf{Optimizations.}
-
-In general, the second most expensive part of the protocol is running the \PSI.
-Decreasing the required time for this operation would have a significant
-decrease on the cost of our lightweight applications.  We could take advantage
-of the fact that in our \PSI setting, one of the parties (the \garbler) has the
-full set, and the other one (the \broker) a subset of it.  Another possibility
-would be to try different ways of batching the labels in the \PSI.
+\noindent\textbf{Optimizations.} In general, the second most expensive part of
+the protocol is running the \PSI.  Decreasing the required time for this
+operation would have a significant decrease on the cost of our lightweight
+applications.  We could take advantage of the fact that in our \PSI setting,
+one of the parties (the \garbler) has the full set, and the other one (the
+\broker) a subset of it.  Another possibility would be to try different ways of
+batching the labels in the \PSI.
 
 The garbling and evaluation of the identity gates could be optimized by
 incorporating the operations in the C code of libgarble.  Even though the
