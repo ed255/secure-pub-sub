@@ -44,7 +44,7 @@ parts of the messages underlying the \MQTT{} communication, allowing the \broker
 to be aware of the operation without being able to reveal or tamper with any
 ratchet key.
 
-\noindent\textbf{Seed syncrhonization}. To maintain syncrhonization of the
+\noindent\textbf{Seed synchronization}. To maintain synchronization of the
 ratchet keys between the clients and the \garbler, when sending values, the
 Publisher adds the round of the ratchet key used to derive the seeds used to
 generate the labels in the message.  When the \broker requests the garbling of
@@ -247,7 +247,7 @@ per-device specific topic.  The device specific topic is formed using the
 Client's (Subscriber or Publisher) public key.
 
 \vspace{-4pt}
-\subsection{Identity Gates for FreeXOR Compatibility.}
+\subsection{Identity Gates for Free-XOR Compatibility.}
 
 The free XOR optimization in garbled circuits require that for every wire, the
 XOR of the label for bit 0 and bit 1 be a unique secret constant \emph{delta}

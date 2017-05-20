@@ -7,7 +7,7 @@ publish-subscribe entities, publishers, subscribers, and a broker, as shown in
 Figure~\ref{fig:pps-out} and (\emph{ii.}) without such an external entity as
 shown in Figure~\ref{fig:pps-local}. First setting is suitable for less
 resourceful devices, such as, mobile phones, and the second setting is suitable
-for large organiazations with hundreds of subscribers. We describe our protocol
+for large organizations with hundreds of subscribers. We describe our protocol
 and system in first setting, but they could be easily adapted to the second
 setting.
 
@@ -23,7 +23,7 @@ describe our system in Section~\ref{sec:system}, which is not a mere
 implementation of our protocol. We developed a range of system techniques, such
 as, developing a new high-level functional language to describe computations
 and generate circuits, extending garbled circuits library libgarble, identity
-gates to make our protocol compatible with FreeXOR optimization, and establish
+gates to make our protocol compatible with Free-XOR optimization, and establish
 authenticated and encrypted channel on top of MQTT. 
 
 We assume direct authenticated encrypted channels in this section.  However, in
@@ -156,6 +156,6 @@ can be done for this? May be it could be detected if it is creating a real
 problem.}
 
 \improvement{A subscribing entity can setup it's own \garbler. First we explain
-with \garbler as a separate tntity and then later explain how it can be
-eliminated by transfering it's functionality to subscribers. Similary, we can
+with \garbler as a separate entity and then later explain how it can be
+eliminated by transferring it's functionality to subscribers. Similarly, we can
 transfer some functionality to publishers. Which one of them is better?}
