@@ -212,9 +212,9 @@ formula:
 
 \[
 \begin{pmatrix} b \\ c \end{pmatrix} =
-\left( \displaystyle\sum_{i=1}^n \begin{pmatrix} 1 \\ x_i \end{pmatrix}
+\left( \sum_{i=1}^n \begin{pmatrix} 1 \\ x_i \end{pmatrix}
   \begin{pmatrix} 1 & x_i\end{pmatrix}\right)^{-1}
-\left( \displaystyle\sum_{i=1}^n y_i \begin{pmatrix} 1 \\ x_i \end{pmatrix}\right)
+\left( \sum_{i=1}^n y_i \begin{pmatrix} 1 \\ x_i \end{pmatrix}\right)
 \]
 
 Evaluating the formula requires an inversion of a $2 x 2$ matrix, which we perform
@@ -287,8 +287,8 @@ closed-form formula:
 
 \vspace{-8pt}
 \[
-r_{xy} = \frac{\displaystyle\sum_{i=1}^n (x_i - \bar{x}) (y_i - \bar{y})}
-{\sqrt{\displaystyle\sum_{i=1}^n (x_i - \bar{x})^2 (y_i - \bar{y})^2}}
+r_{xy} = \frac{\sum_{i=1}^n (x_i - \bar{x}) (y_i - \bar{y})}
+{\sqrt{\sum_{i=1}^n (x_i - \bar{x})^2 (y_i - \bar{y})^2}}
 \]
 
 To improve efficiency, we evaluate the squared correlation ($r_{xy}^2$) to avoid
