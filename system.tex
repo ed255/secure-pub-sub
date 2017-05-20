@@ -6,7 +6,7 @@ allows exchanging messages in a publisher-subscriber model arbitrated by a
 \broker.  In order to set up the ratchet keys, both Subscribers and Publishers
 need a private communication channel with the \garbler.  In order to embed
 this communication into the MQTT protocol each client (either Publisher or
-Subscriber) will have a device-specific topic that will allow two-way
+Subscriber) will have a device-specific topic that will allow a two-way
 authenticated communication between each client and the \broker.  The \broker
 will forward the messages from this channel to the \garbler so that clients
 can establish a ratchet key with the \garbler.  This design choice helps us
@@ -29,10 +29,10 @@ sent from the \garbler to the Subscriber.
 Publishers and the \garbler, and between the Subscribers and the \garbler
 allows us to maintain forward secrecy at the published value level and at the
 function output level at a very low cost.  With this we achieve the property
-that if an attacker gets hold of the secret keys from any participantin the
+that if an attacker gets hold of the secret keys from any participant in the
 protocol, this attacker will not be able to decrypt past values even if they
 have recorded all previous communications.  Ratchet keys work by advancing a
-secret key every at round (by means of using the using the preimage-resistance
+secret key every at round (by means of using the preimage-resistance property
 of a cryptographic hash function).  At any round, a seed can be derived from a
 ratchet key to be used to generate pseudorandom byte strings.  The idea of
 using ratchet keys to achieve forward secrecy has been popularized by the
@@ -45,7 +45,7 @@ to be aware of the operation without being able to reveal or tamper with any
 ratchet key.
 
 \noindent\textbf{Seed syncrhonization}. To maintain syncrhonization of the
-ratchet keys between the clients and the \garbler, when sending values the
+ratchet keys between the clients and the \garbler, when sending values, the
 Publisher adds the round of the ratchet key used to derive the seeds used to
 generate the labels in the message.  When the \broker requests the garbling of
 the circuit to the \garbler, it also specifies the rounds of the values it will
@@ -56,7 +56,7 @@ that the \broker can forward this information to the Subscribers which in turn
 advance their stored ratchet keys to derive a matching mask.
 
 During the Publisher setup phase, not only its ratchet key will be established
-but also the \broker will register a special publishing topic that the Publisher
+but the \broker will also register a special publishing topic that the Publisher
 will use to submit its encrypted values.  Every time the \broker evaluates a
 garbled circuit using Publishers encrypted values as inputs, it will publish
 the masked result to the relevant function topic so that the interested
@@ -72,9 +72,9 @@ The block cipher behind the garbled circuit in our implementation is AES-128
 direct relation to the size of the garbled circuit (as every non-XOR gate
 requires a fixed number of cipher blocks) as well as the required bandwidth
 between Publishers and the \broker, and between Subscribers and the \broker.  In
-particular, for every secret bit transferred from or to a client (which will
-either be an input bit or an output bit of the garbled circuit) will be
-expanded to 128 bits.
+particular, every secret bit transferred from or to a client (which will either
+be an input bit or an output bit of the garbled circuit) will be expanded to
+128 bits.
 
 \subsection{Extending \libgarble.}
 
@@ -88,7 +88,7 @@ the cost of losing privacy and only guaranteeing authenticity).  Apart from
 restructuring the code to make it more concise, it also offers a better API
 than \emph{JustGarble} to build circuits.
 
-Nevertheless, \libgarble{} being in current development lacks some
+Nevertheless, because \libgarble{} is in current development, it lacks some
 functionality which we had to add in order to build circuits and garble them
 according to our needs.  On the garbling side, we implemented the NOT gate
 (expressed as the XOR of the input with 1 to take advantage of the free-XOR
@@ -102,7 +102,7 @@ allow a wide variety of functions to be described: \textbf{signed fixed point
 multiplication}, \textbf{signed fixed point division} and \textbf{signed
 min/max}.
 
-The motivation to operate with fixed point numbers was to be able apply
+The motivation to operate with fixed point numbers was to be able to apply
 arbitrary functions based on arithmetic operations without the constraint of
 having just integer values.  Even though it would be easy to scale input values
 to be integers maintaining the desired precision, it's common in several
@@ -119,15 +119,16 @@ signed fixed point numbers was not hard (for multiplication we need to fix the
 scaling of the result and for min/max we need to figure out the signedness of
 the inputs), implementing \textbf{division} becomes a challenge.  Most of the
 fast division algorithms are not fit for combinational circuits, which is a
-constraint for the garbled circuits, because they assume circuit loops which we
-will need to unroll, among other optimizations.  For this reason we implemented
-the simplest non-optimized division algorithm: division by repeated subtraction
-with a fixed number of iterations (assuming the worst case).
+constraint for the garbled circuits because such algorithms assume circuit
+loops which we will need to unroll, among other optimizations.  For this reason
+we implemented the simplest non-optimized division algorithm: division by
+repeated subtraction with a fixed number of iterations (assuming the worst
+case).
 
 \subsection{High level language to build circuits.}
 
 While \libgarble{} exposes the functions needed to build circuits corresponding
-to the functions we are interested in, the process becomes cumbersome and error
+to the functions we are interested in, the process can become cumbersome and error
 prone.  To facilitate building circuits from functions we have implemented an
 interpreter for a functional programming language inspired in Scheme, a dialect
 of Lisp.  This choice was motivated both by the simplicity of parsing a
@@ -135,44 +136,48 @@ Lisp-like language as well as the similarity between the descriptive nature of
 functional languages with combinational circuits, which helps reasoning about
 how the circuit is built.  Moreover, the availability of high-order functions
 in the language (functions that take functions as arguments and/or return
-functions as a result) allows us to express circuits that combine building
-blocks very concisely.
+functions as a result) allows us to express circuits that combine different
+building blocks very concisely.
 
-The interpreter is written in golang in just 470 lines of code.
+The interpreter is written in Go in just 470 lines of code, and it is based on
+a minimal Scheme interpreter published in an open source
+license\footnote{https://pkelchte.wordpress.com/2013/12/31/scm-go/}.
 
 Other solutions to express garbled circuits in higher level languages than the
-underlying gates themselves have been proposed: namely \OblivC{}~\cite{oblivc}.
+underlying gates themselves have been proposed; for example, \OblivC{}~\cite{oblivc}.
 \OblivC{} allows the developer to embed the secure computation part of a
 protocol in C code with a GCC wrapper that takes care of the compilation, the
 circuit building and the integration in a distributed program.  We don't
 require this embedding in our protocol because the secure function is directly
-described independently.
+described independently.  We also have a different setting, in which one of the
+parties doesn't learn the circuit result.
 
 \noindent
 \begin{minipage}{\linewidth}
 \lstinputlisting[
 caption={Definition of the \emph{fold} high order function with an example of
-its usage with \emph{min2} to define a new function.}]
+its usage with \emph{min2} to define a new function.}, label=prelude]
 {listings/prelude.lsp}
 \end{minipage}
 
-Where the only \libgarble{} building block is \texttt{min2}, which takes two
-signed integers and returns the smaller one.
-
-\texttt{fold} is a high order function that recursively traverses a list
-\texttt{l} combining its elements with a function \texttt{f} to build up a
-return value.
+In listing~\ref{prelude} we show a snippet of circuit building code, where the
+only \libgarble{} building block is \texttt{min2} (which takes two signed
+integers and returns the smaller one).  \texttt{fold} is a high order function
+that recursively traverses a list \texttt{l} combining its elements with a
+function \texttt{f} to build up a return value.
 
 \noindent
 \begin{minipage}{\linewidth}
 \lstinputlisting[
-caption={Example of a function over Publishers' values.}]
+caption={Example of a function over Publishers' values.}, label=min-example]
 {listings/min-example.lsp}
 \end{minipage}
 
-From this function definition the interpreter is capable of constructing the
-circuit that evaluates the function as well as storing the list of publisher
-values required to evaluate it.
+In listing~\ref{min-example} we show a circuit function definition that uses
+the functions defined in listing~\ref{prelude}.  From this function definition
+the interpreter is capable of constructing the circuit that evaluates the
+function as well as storing the list of publisher values required to evaluate
+it.
 
 Four our implementation we decided to use the same representation for all
 numerical values: two's complement fixed point 32 bit numbers, with 26 bits for
@@ -181,7 +186,7 @@ the integer part and 8 bits for the decimal part.
 \subsection{\broker and \garbler.}
 
 The \broker and the \garbler have been written in the Go programming
-language.  The choice of go was motivated on one hand due to the provided
+language.  The choice of Go was motivated on one hand due to the provided
 built-in concurrency facilities such as \emph{goroutines} (light-weight
 threads) and \emph{channels} (a primitive to send messages between
 \emph{goroutines}), which are very appropriate for the networking server nature
@@ -196,7 +201,7 @@ TCP RPC synchronously.
 The \broker requires a regular \MQTT{} \broker server which we take from an
 open source implementation~\cite{mqttgo}.  We have modified it so that any
 received message whose topic starts with a name space reserved for our
-protocol, will be handled according to the protocol description instead of
+protocol will be handled according to the protocol description instead of
 being forwarded to the subscribers of that topic.
 
 The \broker and \garbler are required to maintain replicated data structures
@@ -222,10 +227,10 @@ as well as its resource consumption, considering that the code may be running
 in a resource-constraint IoT device.  For the \MQTT{} part of the Publisher we
 have used the Eclipse Paho client library~\cite{paho}.
 
-On the other hand, the Subscriber has been written in golang, assuming that it
-will be running on a more powerful device.  The \MQTT{} library used by the
-Subscriber is the same we used in the \broker\~cite{mqttgo}, which also provides
-client functionality.
+On the other hand, the Subscriber has been written in Go, assuming that it
+will probably be running on a more powerful device.  The \MQTT{} library used
+by the Subscriber is the same we used in the \broker\~cite{mqttgo}, which also
+provides client functionality.
 
 Publishers and Subscribers follow a state machine to initialize themselves
 (i.e.\ for Publishers to obtain a Publisher ratchet key, for Subscribers to
