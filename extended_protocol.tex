@@ -1,4 +1,4 @@
-\begin{figure*}[h]
+\begin{figure}
 \begin{mdframed}[style=myframe]
 
 \initialize
@@ -24,10 +24,10 @@
 \begin{itemize}[leftmargin=*,itemsep=4pt,topsep=4pt]
 		
 	\item To publish $k$th value, publisher generates two pseudorandom wire
-		labels, $w_0$ and $w_1$, using seed $s$, for each bit of the value.  $w_0$
-		is $i$th and $w_1$ is $(i+1)$th numbers in pseudorandom sequence generated
-		using seed $s$; $2kL \leq i < 2(k+1)L$, $L$ being the bit-length of a
-		value.
+		labels, $w_0$ and $w_1$, using seed $s$ in a pseudorandom number generator
+		(PRNG), for each bit of the value.  $w_0$ is $i$th and $w_1$ is $(i+1)$th
+		numbers in pseudorandom sequence generated using seed $s$; $2kL \leq i <
+		2(k+1)L$, $L$ being the bit-length of a value.
 
 	\item For each input bit $b$, publisher sends only wire label $w_b$ to
 		\broker.
@@ -70,5 +70,5 @@ Following procedure ensures that seeds $s$ and $s'$ used above are forward
 
 \end{mdframed}
 \caption{Reduced Communication Extension with Forward Security}
-\label{fig:basicprotocol}
-\end{figure*}
+\label{fig:extended_protocol}
+\end{figure}
