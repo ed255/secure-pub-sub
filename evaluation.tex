@@ -104,7 +104,7 @@ than the later two functions when the number of Publishers well passes the
 thousands.
 
 \begin{figure}
-  \includegraphics[width=0.35\textwidth]{plots/enc_dec.png}
+  \includegraphics[width=0.32\textwidth]{plots/enc_dec.png}
   \caption{Time spent garbling and evaluating the identity input gates.
     Results obtained from the mean of all microbenchmark functions with 5
     repetitions each, with the confidence interval of 95\% shown in gray.}
@@ -117,7 +117,7 @@ garbling to be roughly twice the times of evaluating (garbling involves
 encrypting two labels whereas evaluating involves decrypting one)
 
 \begin{figure}
-  \includegraphics[width=0.35\textwidth]{plots/nonxor_gates_log.png}
+  \includegraphics[width=0.32\textwidth]{plots/nonxor_gates_log.png}
   \caption{Non-XOR gates count per function used in the microbenchmarks.}
   \label{micro-nonxor}
 \end{figure}
@@ -130,7 +130,7 @@ comparing shape of the plot with timing results shown in
 figure~\ref{fig:micro-times}.
 
 \begin{figure}
-  \includegraphics[width=0.35\textwidth]{plots/size_log.png}
+  \includegraphics[width=0.32\textwidth]{plots/size_log.png}
   \caption{Size of the garbled circuit and the associated date required by the
     \broker to evaluate it.}
   \label{micro-sizes}
@@ -179,7 +179,7 @@ possible real usages of the presented protocol.
 \bigskip
 \noindent\textbf{Wireless propagation constant}
 
-In this application we take the real time data provided by a testbed of IoT
+\noindent In this application we take the real time data provided by a testbed of IoT
 nodes deployed in our university forming a mesh network.
 
 The mesh network is formed by a fixed number of nodes deployed in different
@@ -214,7 +214,6 @@ formula:
   \begin{pmatrix} 1 & x_i\end{pmatrix}\right)^{-1}
 \left( \displaystyle\sum_{i=1}^n y_i \begin{pmatrix} 1 \\ x_i \end{pmatrix}\right)
 \]
-\vspace{1mm}
 
 Evaluating the formula requires an inversion of a $2 x 2$ matrix, which we perform
 by following the analytic solution.
@@ -233,7 +232,7 @@ application scales (notice that the number of inputs for the linear regression
 formula grows quadratically when the number of nodes increases linearly)
 
 \begin{figure}
-  \includegraphics[width=0.35\textwidth]{plots/turonet.png}
+  \includegraphics[width=0.32\textwidth]{plots/turonet.png}
   \caption{Mean time required for garbling, evaluating and sending the garbled
     circuit to the \broker for a varying number of nodes in the \emph{wireless
     propagation constant} application.  Results obtained from the mean of 5
@@ -259,7 +258,7 @@ reaches a significant value.
 \bigskip
 \noindent\textbf{Correlation of environmental indoor sensing data}
 
-For this application we will be using the environmental indoor sensing data
+\noindent For this application we will be using the environmental indoor sensing data
 provided by the Intel Berkeley Research
 lab\footnote{\url{http://db.csail.mit.edu/labdata/labdata.html} (accessed
 2017-05-18)}.  This dataset provides 2.3 million readings collected
@@ -289,7 +288,6 @@ closed-form formula:
 r_{xy} = \frac{\displaystyle\sum_{i=1}^n (x_i - \bar{x}) (y_i - \bar{y})}
 {\sqrt{\displaystyle\sum_{i=1}^n (x_i - \bar{x})^2 (y_i - \bar{y})^2}}
 \]
-\vspace{1mm}
 
 To improve efficiency, we evaluate the squared correlation ($r_{xy}^2$) to avoid
 computing the square root in the function circuit, which would be an expensive
@@ -301,7 +299,7 @@ number of samples, which also gives us information about the relationship
 between the two data streams.
 
 \begin{figure}
-  \includegraphics[width=0.35\textwidth]{plots/stream.png}
+  \includegraphics[width=0.32\textwidth]{plots/stream.png}
   \caption{Mean time required for garbling, evaluating and sending the garbled
     circuit to the \broker for computing the squared correlation and linear
     regression of data streams.  Garbling and evaluating includes the time to
@@ -322,7 +320,7 @@ linear model and the samples.
 \bigskip
 \noindent\textbf{Daily statistics of airport parking lots}
 
-The dataset for this application is the live status of the parking lots of a
+\noindent The dataset for this application is the live status of the parking lots of a
 major
 airport\footnote{\url{https://data.lacity.org/dataset/Los-Angeles-International-Airport-LAX-Parking-Lots/dik5-hwp6}
 (accessed 2017-05-18)}.  In particular, the airport provides updates of the
@@ -419,14 +417,13 @@ with the minimum fluctuation, but in a real system, several functions could be
 run at the same time allowing for concurrent garbling and evaluation making use
 of all the CPU cores available.
 
-\noindent\textbf{Optimizations.}
-
-In general, the second most expensive part of the protocol is running the \PSI.
-Decreasing the required time for this operation would have a significant
-decrease on the cost of our lightweight applications.  We could take advantage
-of the fact that in our \PSI setting, one of the parties (the \garbler) has the
-full set, and the other one (the \broker) a subset of it.  Another possibility
-would be to try different ways of batching the labels in the \PSI.
+\noindent\textbf{Optimizations.} In general, the second most expensive part of
+the protocol is running the \PSI.  Decreasing the required time for this
+operation would have a significant decrease on the cost of our lightweight
+applications.  We could take advantage of the fact that in our \PSI setting,
+one of the parties (the \garbler) has the full set, and the other one (the
+\broker) a subset of it.  Another possibility would be to try different ways of
+batching the labels in the \PSI.
 
 The garbling and evaluation of the identity gates could be optimized by
 incorporating the operations in the C code of libgarble.  Even though the
