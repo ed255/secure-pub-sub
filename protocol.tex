@@ -73,7 +73,12 @@ number generator to independently generate two wire labels for each input bit,
 eliminating wire labels communication between publishers and \garbler.
 Similarly, subscribers for computation $C$ shares a truly random seed $s'$ and
 use pseudorandom number generator to independently generate output masks,
-eliminating output mask communication between subscribers and \garbler.
+eliminating output mask communication between subscribers and \garbler.\\[6pt] 
+
+\noindent\textbf{Wire Label Synchronization.} This method requires
+synchronization between publishers, subscribers and \garbler; we explain in
+Section~\ref{sec:system} how publishers and subscribers remain in
+synchronization with \garbler using a round counter.\\[6pt]
 
 \noindent\textbf{Forward Secure Seeds.} While this protocol significantly
 reduces publishers' and subscribers' communication with \garbler, an adversary
@@ -83,18 +88,18 @@ future.  An adversary stealing the seed $s'$ for computation $C$ from a
 subscriber and colluding with \broker compromises the confidentiality of
 outputs of all executions of computation $C$.
 
-We use key ratcheting protocol of Signal, a popular secure messaging protocol,
-to make seeds all seeds $s$ and $s'$ forward secure, i.e., an adversary
+We adapt key ratcheting protocol of Signal, a popular secure messaging
+protocol, to make all seeds $s$ and $s'$ forward secure, i.e., an adversary
 stealing a seed wouldn't be able to compromise confidentiality of any past
-inputs and outputs. An adversary stealing $s$ and $s'$ would still learn all
-current and future inputs for a publisher and outputs for computation $C$.
-However, an adversary learns a compromised publisher's current and future
-inputs and outputs of all current and future computations to which a
-compromised subscriber is subscribed to, even without stealing the seeds. In
-other words, an adversary stealing seeds $s$ and $s'$ can only do as much harm
-in the real world execution as a simulator stealing the same seeds can do in
-the ideal world.  Therefore, forward secure seeds, provide the same protection
-as our base protocol.
+inputs and outputs. An adversary stealing publisher's seed $s$ and computation
+$C$ seed $s'$ would still learn all current and future inputs of the publisher
+and outputs for computation $C$.  However, an adversary learns a compromised
+publisher's current and future inputs and outputs of all current and future
+computations to which a compromised subscriber is subscribed to, even without
+stealing the seeds. In other words, an adversary stealing seeds $s$ and $s'$
+can only do as much harm in the real world execution as a simulator stealing
+the same seeds can do in the ideal world.  Therefore, forward secure seeds,
+provide the same protection as our base protocol.
 
 \subsection{Efficient Wire Labels Consistency Check} 
 
