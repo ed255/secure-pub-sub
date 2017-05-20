@@ -24,6 +24,13 @@ bandwidth network.  Since we know the size of the garbled circuit, we can
 easily compute the time required to transfer it over a Gigabit connection and
 add that delay to the measured time.
 
+Our current implementation doesn't support the Private Set Intersection between
+\broker and \garbler used to guarantee that the labels sent by the Publishers
+are valid for the garbled circuit.  In order to evaluate this step of the
+protocol we have run simulations of an implementation of the Private Set
+Intersection based on Oblivious Transfer extension~\cite{Pinkas0Z14}, using the
+number of labels corresponding to 32 bit values.
+
 In all our measured times, sending includes the marshaling and unmarshaling of
 the garbled circuit and associated data structures necessary for transmitting
 it from the \garbler to the \broker via RPC.
@@ -87,7 +94,7 @@ decrypting the inputs) makes a significant influence in the faster functions,
 being comparable in magnitude to the evaluation and garbling time of the
 \emph{summation} (the input decryption time is even higher than the garbled
 circuit evaluation time for \emph{summation}).  We attribute this behavior to
-the fact that this part of the protocol is implemented in go instead of C like
+the fact that this part of the protocol is implemented in Go instead of C like
 the garbling and evaluation.
 
 We can also see how the time spent on the Private Set Intersection protocol is
@@ -241,7 +248,7 @@ number of nodes.  Our experiments end at 25 nodes because at at 30 Nodes we
 would be dealing with $30 \cdot 29 = 870$ samples to perform the correlation,
 which corresponds to a garbled circuit of size bigger than 1 GiB.  At this
 magnitude we hit a limit on the encoding used when marshaling the garbled
-circuit in the go RPC implementation, which doesn't support data structures
+circuit in the Go RPC implementation, which doesn't support data structures
 bigger than 1 GiB.  Notice however that we are using all the samples to
 calculate the linear regression even though a random sample of a smaller size
 would suffice; and that our scenario considers that all nodes are
@@ -382,20 +389,26 @@ protocol, and thus is the current bottleneck.  This means that the quality and
 bandwidth of the network connection between the \broker and the \garbler is of
 critical importance.
 
-The actual fraction of time spent on sending the garbled circuit varies
-depending on the circuit function and the number of Publishers, ranging from
-about 50 \% as in the rank calculated in the \emph{daily statistics of airport
-parking lot} to about 80\% as in the \emph{wireless propagation constant}
-application with 25 nodes.
+The actual fraction (without considering the \PSI) of time spent on sending the
+garbled circuit varies depending on the circuit function and the number of
+Publishers, ranging from about 50 \% as in the rank calculated in the
+\emph{daily statistics of airport parking lot} to about 80\% as in the
+\emph{wireless propagation constant} application with 25 nodes.
+
+When we consider the results of the \PSI simulation, we observe that for the
+most lightweight applications it requires more time than all the garbled
+operations combined, whereas in the most heavyweight applications it can become
+as small as the 10\%.
 
 The total time required for computing the functions securely in our different
-applications experiments range from about a second as in the \emph{daily
-statistics of airport parking lot} to a about 13 seconds as in the
-\emph{correlation of environmental data}.  Considering the fraction of time
-spent sending the garbled circuit in the more costly application
-configurations, we could get a good estimate of the total time by just knowing
-the number of non-XOR gates used (which would determine the size of the garbled
-circuit) and the network bandwidth available from \broker to \garbler.
+applications experiments range from about two seconds as in the \emph{daily
+statistics of airport parking lot} to a about 14 seconds as in the
+\emph{correlation of environmental data} with 500 samples.  Considering the
+fraction of time spent sending the garbled circuit in the more costly
+application configurations, we could get a good estimate of the total time by
+just knowing the number of non-XOR gates used (which would determine the size
+of the garbled circuit) and the network bandwidth available from \broker to
+\garbler.
 
 The results obtained are perfectly suitable for computing several functions
 like the ones presented in the applications in a \broker-\garbler pair
@@ -406,12 +419,21 @@ with the minimum fluctuation, but in a real system, several functions could be
 run at the same time allowing for concurrent garbling and evaluation making use
 of all the CPU cores available.
 
-\noindent\textbf{Optimizations.}  The garbling and evaluation of the identity
-gates could be optimized by incorporating the operations in the C code of
-libgarble.  Even though the golang implementation of the AES encryption and
-decryption functions use the Intel AES-NI hardware instructions, conversions
-from byte vectors to AES blocks and vice versa slow down the operation.  On the
-other hand, libgarble works natively with 128 bits data types (the size of an
-AES block) by using the Intel SSE2 extensions, thus not requiring any
-conversion during encryption/decryption.
+\noindent\textbf{Optimizations.}
+
+In general, the second most expensive part of the protocol is running the \PSI.
+Decreasing the required time for this operation would have a significant
+decrease on the cost of our lightweight applications.  We could take advantage
+of the fact that in our \PSI setting, one of the parties (the \garbler) has the
+full set, and the other one (the \broker) a subset of it.  Another possibility
+would be to try different ways of batching the labels in the \PSI.
+
+The garbling and evaluation of the identity gates could be optimized by
+incorporating the operations in the C code of libgarble.  Even though the
+Go implementation of the AES encryption and decryption functions use the
+Intel AES-NI hardware instructions, conversions from byte vectors to AES blocks
+and vice versa slow down the operation.  On the other hand, libgarble works
+natively with 128 bits data types (the size of an AES block) by using the Intel
+SSE2 extensions, thus not requiring any conversion during
+encryption/decryption.
 
