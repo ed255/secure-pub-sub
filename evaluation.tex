@@ -78,15 +78,23 @@ lightweight function, and doesn't show yet a stabilizing linear trend for the
 number of Publishers used in the experiment.  Accompanying the garble
 (figure~\ref{fig:micro-garble-time}) and the evaluate
 (figure~\ref{fig:micro-eval-time}) we show the time it took to garble and
-evaluate the input identity gates.
+evaluate the input identity gates.  We have also decoupled the time spent
+following the Private Set Intersection between the \broker and \garbler from
+the sending time, and we show it in figure~\ref{fig:micro-send-time}.
 
-We can see that the time on the identity gates (encrypting and decrypting the
-inputs) makes a significant influence in the faster functions, being comparable
-in magnitude to the evaluation and garbling time of the \emph{summation}
-(the input decryption time is even higher than the garbled circuit evaluation
-time for \emph{summation}).  We attribute this behavior to the fact that this
-part of the protocol is implemented in go instead of C like the garbling and
-evaluation.
+We can see that the time spent dealing with the identity gates (encrypting and
+decrypting the inputs) makes a significant influence in the faster functions,
+being comparable in magnitude to the evaluation and garbling time of the
+\emph{summation} (the input decryption time is even higher than the garbled
+circuit evaluation time for \emph{summation}).  We attribute this behavior to
+the fact that this part of the protocol is implemented in go instead of C like
+the garbling and evaluation.
+
+We can also see how the time spent on the Private Set Intersection protocol is
+higher than the time required for sending in the case of the \emph{Mean},
+\emph{Min} and \emph{summation}, although it seems that it will scale better
+than the later two functions when the number of Publishers well passes the
+thousands.
 
 \begin{figure}
   \includegraphics[width=0.35\textwidth]{plots/enc_dec.png}
@@ -107,10 +115,10 @@ encrypting two labels whereas evaluating involves decrypting one)
   \label{micro-nonxor}
 \end{figure}
 
-In figure~\ref{micro-nonxor} we show the number of non-XOR gates (that is, the gates that
-incur a garbling and evaluating and that increase the size of the garbled
-circuit) for every function.  We can clearly see the relation between the
-number of the non-XOR gates and the cost of computing every function by
+In figure~\ref{micro-nonxor} we show the number of non-XOR gates (that is, the
+gates that incur a garbling and evaluating and that increase the size of the
+garbled circuit) for every function.  We can clearly see the relation between
+the number of the non-XOR gates and the cost of computing every function by
 comparing shape of the plot with timing results shown in
 figure~\ref{fig:micro-times}.
 
@@ -161,7 +169,8 @@ We have prepared 3 concrete applications based on real IoT datasets to show
 possible real usages of the presented protocol.
 
 % Turonet, wireless propagation constant, linear regression
-\paragraph{Wireless propagation constant}
+\bigskip
+\noindent\textbf{Wireless propagation constant}
 
 In this application we take the real time data provided by a testbed of IoT
 nodes deployed in our university forming a mesh network.
@@ -240,7 +249,8 @@ interconnected, which will usually not be the case when the number of nodes
 reaches a significant value.
 
 % Environmental Berkeley indoor sensing data, correlation
-\paragraph{Correlation of environmental indoor sensing data}
+\bigskip
+\noindent\textbf{Correlation of environmental indoor sensing data}
 
 For this application we will be using the environmental indoor sensing data
 provided by the Intel Berkeley Research
@@ -302,7 +312,8 @@ compute the linear regression and then find a normalized error between the
 linear model and the samples.
 
 % LAX parking lot dataset, statistics
-\paragraph{Daily statistics of airport parking lots}
+\bigskip
+\noindent\textbf{Daily statistics of airport parking lots}
 
 The dataset for this application is the live status of the parking lots of a
 major
@@ -365,10 +376,11 @@ from the microbenchmarks; and the cheapest one is the \emph{rank}.
 
 \subsection{Discussion}
 
-As expected, the time spent sending the garbled circuit from the \garbler to
-the \broker is the most expensive part of the protocol, and thus is the current
-bottleneck.  This means that the quality and bandwidth of the network
-connection between the \broker and the \garbler is of critical importance.
+\noindent\textbf{Bottlenecks.}  As expected, the time spent sending the garbled
+circuit from the \garbler to the \broker is the most expensive part of the
+protocol, and thus is the current bottleneck.  This means that the quality and
+bandwidth of the network connection between the \broker and the \garbler is of
+critical importance.
 
 The actual fraction of time spent on sending the garbled circuit varies
 depending on the circuit function and the number of Publishers, ranging from
@@ -394,12 +406,12 @@ with the minimum fluctuation, but in a real system, several functions could be
 run at the same time allowing for concurrent garbling and evaluation making use
 of all the CPU cores available.
 
-The garbling and evaluation of the identity gates could be optimized by
-incorporating the operations in the C code of libgarble.  Even though the
-golang implementation of the AES encryption and decryption functions use the
-Intel AES-NI hardware instructions, conversions from byte vectors to AES blocks
-and vice versa slow down the operation.  On the other hand, libgarble works
-natively with 128 bits data types (the size of an AES block) by using the Intel
-SSE2 extensions, thus not requiring any conversion during
-encryption/decryption.
+\noindent\textbf{Optimizations.}  The garbling and evaluation of the identity
+gates could be optimized by incorporating the operations in the C code of
+libgarble.  Even though the golang implementation of the AES encryption and
+decryption functions use the Intel AES-NI hardware instructions, conversions
+from byte vectors to AES blocks and vice versa slow down the operation.  On the
+other hand, libgarble works natively with 128 bits data types (the size of an
+AES block) by using the Intel SSE2 extensions, thus not requiring any
+conversion during encryption/decryption.
 

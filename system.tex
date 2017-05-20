@@ -25,35 +25,35 @@ ratchet key.  In the case of Subscribers, for every function subscription, a
 key exchange is performed to derive a key to encrypt the function ratchet key
 sent from the \garbler to the Subscriber.
 
-The use of shared ratchet keys between Publishers and the \garbler, and between
-the Subscribers and the \garbler allows us to maintain forward secrecy at the
-published value level and at the function output level at a very low cost.
-With this we achieve the property that if an attacker gets hold of the secret
-keys from any participantin the protocol, this attacker will not be able to
-decrypt past values even if they have recorded all previous communications.
-Ratchet keys work by advancing a secret key every at round (by means of using
-the using the preimage-resistance of a cryptographic hash function).  At any
-round, a seed can be derived from a ratchet key to be used to generate
-pseudorandom byte strings.  The idea of using ratchet keys to achieve forward
-secrecy has been popularized by the Signal messaging protocol (already analyzed
-by the security research community~\cite{signal1}~\cite{signal2}), from which
-we take inspiration.
-
-To maintain syncrhonization of the ratchet keys between the clients and the
-\garbler, when sending values the Publisher adds the round of the ratchet key
-used to derive the seeds used for the labels in the message.  When the \broker
-requests the garbling of the circuit to the \garbler, it also specifies the
-rounds of the values it will use, so that the \garbler can advance the
-Publisher ratchet key accordingly to derive the same seed and generate matching
-labels.  Similarly, the \garbler tells the \broker the function ratchet key
-round used to generate the mask, so that the \broker can forward this
-information to the Subscribers which in turn advance their stored ratchet keys
-to derive a matching mask.
+\noindent\textbf{Ratchet keys}.  The use of shared ratchet keys between
+Publishers and the \garbler, and between the Subscribers and the \garbler
+allows us to maintain forward secrecy at the published value level and at the
+function output level at a very low cost.  With this we achieve the property
+that if an attacker gets hold of the secret keys from any participantin the
+protocol, this attacker will not be able to decrypt past values even if they
+have recorded all previous communications.  Ratchet keys work by advancing a
+secret key every at round (by means of using the using the preimage-resistance
+of a cryptographic hash function).  At any round, a seed can be derived from a
+ratchet key to be used to generate pseudorandom byte strings.  The idea of
+using ratchet keys to achieve forward secrecy has been popularized by the
+Signal messaging protocol (already analyzed by the security research
+community~\cite{signal1}~\cite{signal2}), from which we take inspiration.
 
 This design achieves the desired cryptographic properties of TLS for selected
 parts of the messages underlying the \MQTT{} communication, allowing the \broker
 to be aware of the operation without being able to reveal or tamper with any
 ratchet key.
+
+\noindent\textbf{Seed syncrhonization}. To maintain syncrhonization of the
+ratchet keys between the clients and the \garbler, when sending values the
+Publisher adds the round of the ratchet key used to derive the seeds used to
+generate the labels in the message.  When the \broker requests the garbling of
+the circuit to the \garbler, it also specifies the rounds of the values it will
+use, so that the \garbler can advance the Publisher ratchet key accordingly to
+derive the same seed and generate matching labels.  Similarly, the \garbler
+tells the \broker the function ratchet key round used to generate the mask, so
+that the \broker can forward this information to the Subscribers which in turn
+advance their stored ratchet keys to derive a matching mask.
 
 During the Publisher setup phase, not only its ratchet key will be established
 but also the \broker will register a special publishing topic that the Publisher
