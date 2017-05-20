@@ -1,6 +1,18 @@
 \section{Protocol}
 \label{sec:protocol}
 
+We propose two settings for secure publish-process-subscribe protocols :
+(\emph{i.}) with an honest-but-curious external entity in addition to standard
+publish-subscribe entities, publishers, subscribers, and a broker, as shown in
+Figure~\ref{fig:pps-out} and (\emph{ii.}) without such an external entity as
+shown in Figure~\ref{fig:pps-local}. First setting is suitable for less
+resourceful devices, such as, mobile phones, and the second setting is suitable
+for large organiazations with hundreds of subscribers. We describe our protocol
+and system in first setting, but they could be easily adapted to the second
+setting.
+
+\input{settings}
+
 We describe a base secure publish-process-subscribe protocol first, for ease of
 understanding and reasoning about security, followed by extensions for reducing
 communication and efficiently handling malicious publishers disrupting the
