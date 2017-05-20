@@ -1,24 +1,110 @@
 \section{Introduction}
 \label{sec:intro}
 
-As the Internet of Things (IoT) is emerging, rich new sets of applications are being envisioned that will require large-scale and complex deployments. These are motivating the rise of new network and middleware protocols to address 
-key challenges including scale, inter-operability, security, and robustness~\cite{Stankovic14, al2015internet, sicari2015security}. 
+As the Internet of Things (IoT) is emerging, rich new sets of applications are
+being envisioned that will require large-scale and complex deployments. These
+are motivating the rise of new network and middleware protocols to address key
+challenges including scale, inter-operability, security, and
+robustness~\cite{Stankovic14, al2015internet, sicari2015security}. 
 
-For example, smart cities concepts are being proposed that incorporate many IoT-based deployments and applications. These include smart transportation applications that make use of real time sensor feeds from road traffic sensors (both infrastructure based and participatory mobile sensing)~\cite{leduc2008road, mohan2008nericell}, smart parking meters~\cite{ji2014cloud}, and bike sharing systems that utilize sensor feeds on location of bikes~\cite{midgley2009role}; applications aimed at monitoring and improving the environment using static and mobile sensors to measure air and water quality~\cite{dutta2009common, le2007design}; automated water and power meter reading applications~\cite{khalifa2011survey}; smart sanitation applications that use streams of sensor data from smart trash~\cite{glouche2013smart} cans indicating their utilization levels for timely removal of urban trash, etc. 
+For example, smart cities concepts are being proposed that incorporate many
+IoT-based deployments and applications. These include smart transportation
+applications that make use of real time sensor feeds from road traffic sensors
+(both infrastructure based and participatory mobile
+sensing)~\cite{leduc2008road, mohan2008nericell}, smart parking
+meters~\cite{ji2014cloud}, and bike sharing systems that utilize sensor feeds
+on location of bikes~\cite{midgley2009role}; applications aimed at monitoring
+and improving the environment using static and mobile sensors to measure air
+and water quality~\cite{dutta2009common, le2007design}; automated water and
+power meter reading applications~\cite{khalifa2011survey}; smart sanitation
+applications that use streams of sensor data from smart
+trash~\cite{glouche2013smart} cans indicating their utilization levels for
+timely removal of urban trash, etc. 
 
-The first generation of IoT systems involving large numbers of densely-deployed real-time streaming sensors such as traffic road sensor deployments~\cite{pems17}, and air quality measurement~\cite{aqmd17} have largely focused on monolithic, vertically integrated applications with essentially a single collection point (which serves as a independent application-specific gateway for other applications to pull data from, in some cases through the provision of suitable API's, or simply through web-scraping). 
+The first generation of IoT systems involving large numbers of densely-deployed
+real-time streaming sensors such as traffic road sensor
+deployments~\cite{pems17}, and air quality measurement~\cite{aqmd17} have
+largely focused on monolithic, vertically integrated applications with
+essentially a single collection point (which serves as a independent
+application-specific gateway for other applications to pull data from, in some
+cases through the provision of suitable API's, or simply through web-scraping). 
 
-However, there is a growing recognition that it is desirable to utilize application-agnostic middleware that allows the number of consumption points to scale. Thus there has been a concerted effort to build and deploy IoT applications using real-time multi-point to multi-point middleware (that sits above the transport layer), and the most commonly used pattern for this kind of communication is the publish-subscribe paradigm~\cite{pubsub}. Publish-Subscribe middleware allow multiple data consumers to connect to and receive streams of real time data from large numbers of sensors. Commonly used examples of publish-subscribe middleware protocols are AQMP and MQTT~\cite{mqtt}, and also on the rise are commercial publish-subscribe platform as a service (PaaS) providers such as PubNub~\cite{pubnub} which provide their own proprietary protocol and API.  
+However, there is a growing recognition that it is desirable to utilize
+application-agnostic middleware that allows the number of consumption points to
+scale. Thus there has been a concerted effort to build and deploy IoT
+applications using real-time multi-point to multi-point middleware (that sits
+above the transport layer), and the most commonly used pattern for this kind of
+communication is the publish-subscribe paradigm~\cite{pubsub}.
+Publish-Subscribe middleware allow multiple data consumers to connect to and
+receive streams of real time data from large numbers of sensors. Commonly used
+examples of publish-subscribe middleware protocols are AQMP and
+MQTT~\cite{mqtt}, and also on the rise are commercial publish-subscribe
+platform as a service (PaaS) providers such as PubNub~\cite{pubnub} which
+provide their own proprietary protocol and API.  
 
-The basic idea behind publish-subscribe systems such as MQTT is that there is a broker (typically centralized and implemented on a cloud server, such as the mosquitto broker for MQTT~\cite{light2013mosquitto}, though there are also some distributed server implementations). Sensors publish messages to specified "topics" that are sent to the broker. Data consumers send to the broker a subscribe request to the specified topics by name. Following this, all messages published to any topic are forwarded by the broker to each subscriber of that topic. While we focus in this paper on sensing-oriented applications, note that pub-sub middleware could also be used to connect applications that generate control actions with actuators (in this case the actuator devices would be the subscribers and controlling applications would be the publishers). As one concrete example of the benefits of a pub-sub system, consider its possible use in a bike-sharing system; signals from bikes that are available could be published to a topic defined by spatial region (e.g. road stretch), and potential riders' devices can subscribe to topics corresponding to the locations near them, allowing them to find the location they can pick up an available bike. 
+The basic idea behind publish-subscribe systems such as MQTT is that there is a
+broker (typically centralized and implemented on a cloud server, such as the
+mosquitto broker for MQTT~\cite{light2013mosquitto}, though there are also some
+distributed server implementations). Sensors publish messages to specified
+"topics" that are sent to the broker. Data consumers send to the broker a
+subscribe request to the specified topics by name. Following this, all messages
+published to any topic are forwarded by the broker to each subscriber of that
+topic. While we focus in this paper on sensing-oriented applications, note that
+pub-sub middleware could also be used to connect applications that generate
+control actions with actuators (in this case the actuator devices would be the
+subscribers and controlling applications would be the publishers). As one
+concrete example of the benefits of a pub-sub system, consider its possible use
+in a bike-sharing system; signals from bikes that are available could be
+published to a topic defined by spatial region (e.g. road stretch), and
+potential riders' devices can subscribe to topics corresponding to the
+locations near them, allowing them to find the location they can pick up an
+available bike. 
 
-The broker in a traditional pub-sub system such as MQTT plays primarily an application layer forwarding role. It may also be enhanced to do some basic authentication of subscribers and publishers to ensure that only authorized users have access to send/receive relevant raw data streams from the broker. 
+The broker in a traditional pub-sub system such as MQTT plays primarily an
+application layer forwarding role. It may also be enhanced to do some basic
+authentication of subscribers and publishers to ensure that only authorized
+users have access to send/receive relevant raw data streams from the broker. 
 
-More than a decade of research, particularly into  wireless sensor networks~\cite{yao2002cougar, krishnamachari2002impact}, has shown the value of incorporating in-network aggregation and processing into sensing applications.  In-network processing allows for greater throughput and energy efficiency (through compression), more meaningful information to derived from raw sensors (through collection of key statistics, multi-modal sensor fusion), anomaly detection, privacy (by allowing aggregation and anonymization of raw data). Prior work has largely addressed incorporating in-network aggregation in the context of data-centric pub-sub systems that operate at the network-layer, but there is a growing recognition that pub-sub middleware at the application layer can also benefit greatly from incorporating processing at the intermediate broker. In this new emerging  publish-process-subscribe paradigm, the broker not only serves as a relay, but also enables computations over the 
-raw streams so that the end subscriber receives real-time computed versions over one or more published streams~\cite{kwame17}. This architecture is particularly appealing as it reduces bandwidth consumption and doesn't place computation on end points which may be resource constrained due to need for low-power and low-cost. Evidence of the growing appeal of this architecture is that the commercial PaaS pub-sub provider PubNub recently introduced processing capability into their system in the form of real-time compute functions they refer to as "BLOCKS"~\cite{blocks}.
+More than a decade of research, particularly into  wireless sensor
+networks~\cite{yao2002cougar, krishnamachari2002impact}, has shown the value of
+incorporating in-network aggregation and processing into sensing applications.
+In-network processing allows for greater throughput and energy efficiency
+(through compression), more meaningful information to derived from raw sensors
+(through collection of key statistics, multi-modal sensor fusion), anomaly
+detection, privacy (by allowing aggregation and anonymization of raw data).
+Prior work has largely addressed incorporating in-network aggregation in the
+context of data-centric pub-sub systems that operate at the network-layer, but
+there is a growing recognition that pub-sub middleware at the application layer
+can also benefit greatly from incorporating processing at the intermediate
+broker. In this new emerging  publish-process-subscribe paradigm, the broker
+not only serves as a relay, but also enables computations over the raw streams
+so that the end subscriber receives real-time computed versions over one or
+more published streams~\cite{kwame17}. This architecture is particularly
+appealing as it reduces bandwidth consumption and doesn't place computation on
+end points which may be resource constrained due to need for low-power and
+low-cost. Evidence of the growing appeal of this architecture is that the
+commercial PaaS pub-sub provider PubNub recently introduced processing
+capability into their system in the form of real-time compute functions they
+refer to as "BLOCKS"~\cite{blocks}.
 
-However, as brokers are typically hosted at third party servers, adding computational processing to pub-sub middleware  introduces concerns about confidentiality. An application that wishes to make use of a third-party MQTT server for traditional pub-sub messaging could always encrypt the data end to end to provide confidentiality guarantees. But with computational functionality being moved to the server, these guarantees no longer hold. This is the focus of our work. 
+However, as brokers are typically hosted at third party servers, adding
+computational processing to pub-sub middleware  introduces concerns about
+confidentiality. An application that wishes to make use of a third-party MQTT
+server for traditional pub-sub messaging could always encrypt the data end to
+end to provide confidentiality guarantees. But with computational functionality
+being moved to the server, these guarantees no longer hold. This is the focus
+of our work.\\[6pt]
 
+\noindent\textbf{Contributions.}
+
+\begin{itemize}[leftmargin=*]
+
+	\item We propose a first provably-secure publish-process-subscribe protocol.
+
+	\item Using our protocol as a foundation, we develop a full-fledged
+publish-process-subscribe system and report a comprehensive evaluation.
+
+\end{itemize}
 %now describe what this paper is about, contributions, etc. 
 
 
