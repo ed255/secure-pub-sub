@@ -185,12 +185,12 @@ possible real usages of the presented protocol.
 nodes deployed in our university forming a mesh network.
 
 The mesh network is formed by a fixed number of nodes deployed in different
-static locations in the same building that connect to each other via wireless.
+static locations in a building that connect to each other via wireless.
 Every node tries to connect to the others unless they are too far, giving us an
 upper bound of $n \cdot (n-1)$ connections where $n$ is the number of nodes.
 Each node periodically publishes the received signal strength ($RSS$) in dBm of
-the nodes it is connected to; and this measure can fluctuate over time due to
-fading.
+the nodes it is connected to; (this measure can fluctuate over time due to
+fading).
 
 We are interested in estimating the wireless propagation constant ($\eta$) in
 the medium while preserving the privacy of the nodes (that is, their location,
@@ -328,7 +328,7 @@ updates of the number of occupied and free parking spaces for each one of the 9
 parking lots every 5 minutes.  This makes a total of 288 published values per
 day per parking lot.
 
-In such application we would be interested in obtaining daily statistics of the
+In such application we are interested in obtaining daily statistics of the
 parking lots without revealing data at fine time granularity.  We will only
 allow obtaining data accumulated throughout the day while preserving the
 privacy of the individual parking lots values.
@@ -388,7 +388,7 @@ protocol, and thus is the current bottleneck.  This means that the quality and
 bandwidth of the network connection between the \broker and the \garbler is of
 critical importance.
 
-The actual fraction (without considering the \PSI) of time spent on sending the
+The fraction (without considering the \PSI) of time spent sending the
 garbled circuit varies depending on the circuit function and the number of
 Publishers, ranging from about 50 \% as in the rank calculated in the
 \emph{daily statistics of airport parking lot} to about 80\% as in the
