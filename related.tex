@@ -11,32 +11,32 @@ evaluator, (\emph{b.}) we have multiple subscribers who want the output of
 computation, (\emph{c.}) our data owners, publishers, are oblivious of
 subscribers and subscribers are oblivious of publishers, (\emph{d.}) we support
 arbitrary polynomial-time computations as opposed to just ridge regression, and
-(\emph{e.}) we don't necessarily need a third party \garbler, as show in
-Figure~\ref{fig:pps-local} if a set subscribers controlled by a single entity
-can do a modest amount of computation. Nikolaenko, et
+(\emph{e.}) we don't necessarily need a third party \garbler, as shown in
+Figure~\ref{fig:pps-local} if a set of subscribers controlled by a single
+entity can do a modest amount of computation. Nikolaenko, et
 al.,\cite{nikolaenko2013privacy} proposed a similar system but for
-privacy-preserving matrix factoring.
+privacy-preserving matrix factoring as opposed to ridge regression.
 
 Naveed, et al., \cite{naveed2014controlled} proposed a new primitive called
 controlled functional encryption inspired by functional encryption. Instead of
-using the same key for a function for computing the function over multiple
-ciphertexts, controlled functional encryption, require a fresh function key for
-every ciphertext. They construct an efficient controlled functional encryption
-scheme for arbitrary polynomial time computations based on Yao's garbled
-circuits and CCA2 secure public key encryption. Their setting involves a data
-owner who wants a client to perform specific computations on it's data with the
-help of an online key authority. Their setting is similar to our setting of
+using the same key for computing the function over multiple ciphertexts,
+controlled functional encryption requires a fresh function key for every
+ciphertext. They construct an efficient controlled functional encryption scheme
+for arbitrary polynomial-time computations based on Yao's garbled circuits and
+CCA2 secure public key encryption. Their setting involves a data owner who
+wants a client to perform only certain computations on it's data with the help
+of an online key authority. Their setting is similar to our setting of
 Figure~\ref{fig:pps-local}; however, in our setting publishers and subscribers
 are oblivious to each other.
 
 Fully homomorphic encryption allows arbitrary computation on encrypted data.
 Gentry proposed the first fully homomorphic encryption
-scheme \cite{brakerski2011fully,gentry2009fully} followed by several more
-efficient schemes \cite{brakerski2014leveled}. Dijk, et
-al., \cite{van2010impossibility} showed that privacy-preserving outsourced
-computation on data from multiple parties and supplying output to multiple
-parties, that is our setting, requires, in addition to fully homomorphic
-encryption, access-controlled ciphertexts and re-encryption. They reduce a
-scheme that computes on data from two parties and supply the output to two
-parties to black box obfuscation, which is impossible in
-general \cite{barak2001possibility}.
+scheme \cite{brakerski2011fully,gentry2009fully} followed by several
+improvfed schemes, e.g., Brakerski, et al., BGV scheme
+\cite{brakerski2014leveled}. Dijk, et al., \cite{van2010impossibility}
+showed that privacy-preserving outsourced computation on data from multiple
+parties and supplying output to multiple parties, our setting, requires, in
+addition to fully homomorphic encryption, access-controlled ciphertexts and
+re-encryption. They reduce a scheme that computes on data from two parties
+and supply the output to two parties to black box program obfuscation, which
+is impossible in general \cite{barak2001possibility}.
