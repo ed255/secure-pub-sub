@@ -48,7 +48,7 @@
 		publishers whose input labels weren't received by \broker as well as any
 		publishers whose labels weren't received by \garbler. \garbler generates a
 		random mask $r$ and use it to mask the output $o$ of $C$, such that
-		evaluating $GC$ would result in a masked output $o+r$.
+		evaluating $GC$ would result in a masked output $o \xor r$.
 		
 	\item \garbler sends $r$ to all subscribers in the set $S_C$ and $GC$ to
 		\broker along with identifiers for publishers for which it hard-wired

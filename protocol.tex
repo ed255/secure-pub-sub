@@ -17,10 +17,10 @@ We describe a base secure publish-process-subscribe protocol first, for ease of
 understanding and reasoning about security, followed by extensions for reducing
 communication and efficiently handling malicious publishers disrupting the
 computation.  We present a simulator for the base protocol to prove that a real
-world adversary cannot do more harm then a simulator can do in the ideal world
+world adversary cannot do more harm than a simulator can do in the ideal world
 (Definition~\ref{def:security}). We also describe security of extensions. We
 describe our system in Section~\ref{sec:system}, which is not a mere
-implementation of our protocol, employing variety of new system techniques. 
+implementation of our protocol, employing a variety of new system techniques. 
 
 %We developed a range of system techniques, such
 %as, developing a new high-level functional language to describe computations
@@ -55,9 +55,9 @@ e.g., $w_0$ and $w_1$ to \garbler and a random wire label $w_r$ to \broker.
 Inconsistent labels prevent \garbler from correctly evaluating the garbled
 circuit. We use private-set-intersection-cardinality (PSI-C) to determine
 inconsistent labels. \garbler hard-wires nullifying values for publishers who
-sent at least $1$ inconsistent label and publishers who didn't sent labels to
+sent at least $1$ inconsistent label and publishers who didn't send labels to
 either \broker or \garbler. \garbler garbles the circuit such that evaluating
-it outputs a masked output and send it to \broker.  Therefore, when \broker
+it outputs a masked output and sends it to \broker.  Therefore, when \broker
 evaluates the garbled circuit, it only learns a masked output, which it
 forwards to $C$'s subscribers. \garbler sends the output mask to $C$'s
 subscribers, who can then unmask the output.
